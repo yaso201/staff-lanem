@@ -1,0 +1,209 @@
+---
+import Layout from '../layouts/Layout.astro';
+---
+<Layout title="Gestion sessions, frais &amp; promotions — Direction" role="dir" page="gestion">
+<style is:global>
+
+  body { background: var(--surface-canvas); }
+
+  .tabs { display: flex; gap: var(--space-2); border-bottom: 1px solid var(--border-subtle); margin-bottom: var(--space-7); }
+  .tab { padding: var(--space-4) var(--space-5); font-size: var(--text-sm); font-weight: 500; color: var(--text-secondary); cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px; display: inline-flex; align-items: center; gap: var(--space-3); }
+  .tab:hover { color: var(--text-primary); }
+  .tab.is-active { color: var(--ink-900); font-weight: 600; border-bottom-color: var(--ink-800); }
+  .panel { display: none; }
+  .panel.is-active { display: block; }
+
+  .card { background: var(--surface-paper); border: 1px solid var(--border-default); border-radius: var(--radius-lg); overflow: hidden; }
+  .card + .card { margin-top: var(--space-5); }
+  .card-head { display: flex; align-items: center; justify-content: space-between; gap: var(--space-4); padding: var(--space-5) var(--space-7); border-bottom: 1px solid var(--border-subtle); }
+  .card-title { font-size: var(--text-base); font-weight: 600; }
+
+  /* Sessions */
+  .sess-row { display: flex; align-items: center; gap: var(--space-6); padding: var(--space-6) var(--space-7); border-top: 1px solid var(--border-subtle); }
+  .sess-row:first-child { border-top: 0; }
+  .sess-ic { width: 44px; height: 44px; border-radius: var(--radius-sm); background: var(--ink-50); color: var(--ink-700); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .sess-main { flex: 1; min-width: 0; }
+  .sess-nm { font-size: var(--text-base); font-weight: 600; }
+  .sess-meta { font-size: var(--text-xs); color: var(--text-tertiary); margin-top: var(--space-2); display: flex; gap: var(--space-2) var(--space-5); flex-wrap: wrap; }
+  .sess-meta span { display: inline-flex; align-items: center; gap: var(--space-2); }
+  .sess-meta svg { color: var(--text-tertiary); }
+  .sess-fill { width: 200px; flex-shrink: 0; }
+  @media (max-width: 820px){ .sess-fill { display: none; } }
+  .sess-fill-top { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: var(--space-3); font-size: var(--text-xs); }
+  .sess-fill-top .pl { color: var(--text-tertiary); } .sess-fill-top b { color: var(--text-primary); font-variant-numeric: tabular-nums; }
+  .sess-track { background: var(--sand-100); height: 8px; border-radius: 999px; overflow: hidden; }
+  .sess-bar { height: 100%; border-radius: 999px; background: linear-gradient(90deg, var(--ink-700), var(--ink-800)); }
+  .sess-side { display: flex; flex-direction: column; align-items: flex-end; gap: var(--space-3); flex-shrink: 0; }
+  .sess-row.closed { opacity: 0.66; }
+
+  /* Frais table */
+  .fees th, .fees td { padding: var(--space-5) var(--space-7); }
+  .fee-amt { font-family: var(--font-display); font-weight: 700; color: var(--text-primary); font-variant-numeric: tabular-nums; }
+  .fee-amt .cur { font-size: var(--text-xs); color: var(--text-tertiary); font-weight: 600; margin-left: 3px; }
+  .fee-na { color: var(--text-tertiary); font-style: italic; font-size: var(--text-sm); }
+
+  /* Promotions */
+  .promo-row { display: flex; align-items: center; gap: var(--space-5); padding: var(--space-6) var(--space-7); border-top: 1px solid var(--border-subtle); }
+  .promo-row:first-child { border-top: 0; }
+  .promo-rate { width: 56px; height: 56px; border-radius: var(--radius-md); background: var(--accent-50); color: var(--accent-700); display: flex; align-items: center; justify-content: center; font-family: var(--font-display); font-size: var(--text-lg); font-weight: 700; flex-shrink: 0; }
+  .promo-main { flex: 1; min-width: 0; }
+  .promo-nm { font-size: var(--text-base); font-weight: 600; }
+  .promo-meta { font-size: var(--text-xs); color: var(--text-tertiary); margin-top: 2px; }
+  .promo-row.off { opacity: 0.6; }
+  .promo-row.off .promo-rate { background: var(--sand-100); color: var(--sand-500); }
+
+</style>
+
+
+<svg style="display:none" aria-hidden="true">
+  <symbol id="i-folders" viewBox="0 0 256 256"><path d="M216,72H131.31L104,44.69A15.86,15.86,0,0,0,92.69,40H40A16,16,0,0,0,24,56V200.62A15.4,15.4,0,0,0,39.38,216H216.89A15.13,15.13,0,0,0,232,200.89V88A16,16,0,0,0,216,72ZM40,56H92.69l16,16H40Z"/></symbol>
+  <symbol id="i-chart" viewBox="0 0 256 256"><path d="M232,208a8,8,0,0,1-8,8H32a8,8,0,0,1-8-8V48a8,8,0,0,1,16,0V152.69l50.34-50.35a8,8,0,0,1,11.32,0L128,132.69,180.69,80H160a8,8,0,0,1,0-16h40a8,8,0,0,1,8,8v40a8,8,0,0,1-16,0V91.31l-58.34,58.35a8,8,0,0,1-11.32,0L96,119.31l-56,56V200H224A8,8,0,0,1,232,208Z"/></symbol>
+  <symbol id="i-coins" viewBox="0 0 256 256"><path d="M184,89.57V84c0-25.08-37.83-44-88-44S8,58.92,8,84v40c0,20.89,26.25,37.49,64,42.46V172c0,25.08,37.83,44,88,44s88-18.92,88-44V132C248,111.3,222.58,94.68,184,89.57Z"/></symbol>
+  <symbol id="i-cal" viewBox="0 0 256 256"><path d="M208,32H184V24a8,8,0,0,0-16,0v8H88V24a8,8,0,0,0-16,0v8H48A16,16,0,0,0,32,48V208a16,16,0,0,0,16,16H208a16,16,0,0,0,16-16V48A16,16,0,0,0,208,32Zm0,176H48V96H208Z"/></symbol>
+  <symbol id="i-clock" viewBox="0 0 256 256"><path d="M128,24A104,104,0,1,0,232,128,104.13,104.13,0,0,0,128,24Zm56,112H128a8,8,0,0,1-8-8V72a8,8,0,0,1,16,0v48h48a8,8,0,0,1,0,16Z"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 256 256"><path d="M224,128a8,8,0,0,1-8,8H136v80a8,8,0,0,1-16,0V136H40a8,8,0,0,1,0-16h80V40a8,8,0,0,1,16,0v80h80A8,8,0,0,1,224,128Z"/></symbol>
+  <symbol id="i-pencil" viewBox="0 0 256 256"><path d="M227.31,73.37,182.63,28.68a16,16,0,0,0-22.63,0L36.69,152A15.86,15.86,0,0,0,32,163.31V208a16,16,0,0,0,16,16H92.69A15.86,15.86,0,0,0,104,219.31L227.31,96a16,16,0,0,0,0-22.63ZM92.69,208H48V163.31l88-88L180.69,120Z"/></symbol>
+  <symbol id="i-graduation" viewBox="0 0 256 256"><path d="M251.76,88.94l-120-64a8,8,0,0,0-7.52,0l-120,64a8,8,0,0,0,0,14.12L32,117.87v48.42a15.91,15.91,0,0,0,4.06,10.65C49.16,191.53,78.51,216,128,216a130,130,0,0,0,48-8.76V240a8,8,0,0,0,16,0V199.51a115.63,115.63,0,0,0,27.94-22.57A15.91,15.91,0,0,0,224,166.29V117.87l27.76-14.81a8,8,0,0,0,0-14.12Z"/></symbol>
+  <symbol id="i-lock-open" viewBox="0 0 256 256"><path d="M208,80H96V56a32,32,0,0,1,32-32c15.37,0,29.2,11,32.16,25.59a8,8,0,0,0,15.68-3.18C171.32,24.15,151.2,8,128,8A48.05,48.05,0,0,0,80,56V80H48A16,16,0,0,0,32,96V208a16,16,0,0,0,16,16H208a16,16,0,0,0,16-16V96A16,16,0,0,0,208,80ZM128,184a20,20,0,1,1,20-20A20,20,0,0,1,128,184Z"/></symbol>
+</svg>
+
+<!-- Barre supérieure -->
+<header class="app-top">
+  <div class="app-top-inner">
+    <div class="brand">emela<span>.</span></div>
+    <nav class="nav">
+      <a data-roles="dir" href="/tableau-direction"><svg class="ico-sm"><use href="#i-chart"/></svg>Tableau de bord</a>
+      <a href="/liste-dossiers"><svg class="ico-sm"><use href="#i-folders"/></svg>Dossiers</a>
+      <a data-roles="dir" href="/gestion-sessions" class="is-active"><svg class="ico-sm"><use href="#i-coins"/></svg>Sessions &amp; frais</a>
+    </nav>
+    <div class="app-user">
+      <div class="meta"><div class="nm">Pr. Adjovi Mensah</div><div class="rl">Direction</div></div>
+      <div class="av">AM</div>
+    </div>
+  </div>
+</header>
+
+<main class="page">
+  <div class="page-head">
+    <div>
+      <h1 class="page-title">Sessions, frais &amp; promotions</h1>
+      <p class="page-sub"><b>Lecture seule.</b> Les sessions s'administrent dans le Desk Frappe ; la grille des frais et les promotions appartiennent à UF (source de vérité, répliquées ici par synchronisation quotidienne).</p>
+    </div>
+  </div>
+
+  <div class="tabs" id="tabs">
+    <div class="tab is-active" data-tab="sessions"><svg class="ico-sm"><use href="#i-cal"/></svg>Sessions</div>
+    <div class="tab" data-tab="frais"><svg class="ico-sm"><use href="#i-coins"/></svg>Grille des frais</div>
+    <div class="tab" data-tab="promos"><svg class="ico-sm"><use href="#i-graduation"/></svg>Promotions &amp; bourses</div>
+  </div>
+
+  <section class="panel is-active" data-panel="sessions">
+    <div class="card">
+      <div class="card-head"><span class="card-title">Sessions d'admission</span><span class="t-caption">Édition : Desk Frappe</span></div>
+      <div id="sessions-list"><p class="t-muted" style="padding:var(--space-6)">Chargement…</p></div>
+    </div>
+  </section>
+
+  <section class="panel" data-panel="frais">
+    <div class="card">
+      <div class="card-head"><span class="card-title">Grille des frais (réplique UF)</span><span class="t-caption">Montants en FCFA · source : UF</span></div>
+      <div class="em-table-wrap" style="border:0;border-radius:0">
+        <table class="em-table fees">
+          <thead><tr><th>Clé</th><th>Programme</th><th>Niveau</th><th>Type</th><th>Montant</th></tr></thead>
+          <tbody id="frais-rows"></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel" data-panel="promos">
+    <div class="card">
+      <div class="card-head"><span class="card-title">Promotions actives (réplique UF)</span></div>
+      <div class="em-table-wrap" style="border:0;border-radius:0">
+        <table class="em-table"><thead><tr><th>Code</th><th>Nom</th><th>Taux</th><th>Période</th><th>Programme</th></tr></thead><tbody id="promos-rows"></tbody></table>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-head"><span class="card-title">Catalogue des bourses (réplique UF)</span></div>
+      <div class="em-table-wrap" style="border:0;border-radius:0">
+        <table class="em-table"><thead><tr><th>Clé</th><th>Nom</th><th>Catégorie</th><th>Taux</th><th>Groupe d'exclusivité</th></tr></thead><tbody id="bourses-rows"></tbody></table>
+      </div>
+    </div>
+  </section>
+</main>
+
+<script is:inline>
+/* C4-FRONT — gestion-sessions en LECTURE SEULE (arbitrage architecte) :
+   sessions = Desk ; frais/promos/bourses = miroirs UF (DEC-206/219 : l'écriture appartient
+   à UF — aucune édition ici). Lecture via REST /api/resource (DocPerms read des rôles staff). */
+(function(){
+  const API = window.EmelaAPI, esc = window.EmelaUI.esc;
+
+  document.getElementById('tabs').addEventListener('click', e=>{
+    const t = e.target.closest('.tab'); if(!t) return;
+    document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('is-active', x===t));
+    document.querySelectorAll('.panel').forEach(p=>p.classList.toggle('is-active', p.dataset.panel===t.dataset.tab));
+  });
+
+  window.onEmelaRole = async function(role){
+    window.__emelaRole = role;  /* W4 : rôle dispo pour le rendu du bouton Clôturer */
+    try {
+      const [sessions, frais, promos, bourses] = await Promise.all([
+        API.resource('Admission Session', ['name','label','academic_year','programme_code','programme_label','is_open','opens_on','closes_on'], null, 'opens_on desc'),
+        API.resource('Admission Fee Catalog', ['name','program_code','level_code','fee_type','amount_xof'], null, 'name asc'),
+        API.resource('Admission Promotion Mirror', ['mirror_key','promo_name','rate','start_date','end_date','program'], null, 'start_date desc'),
+        API.resource('Admission Scholarship Mirror', ['mirror_key','scholarship_name','category','rate','exclusivity_group'], null, 'category asc'),
+      ]);
+
+      document.getElementById('sessions-list').innerHTML = (sessions||[]).map(s =>
+        '<div class="sess-row'+(s.is_open?'':' closed')+'"><span class="sess-ic"><svg class="ico-lg"><use href="#i-cal"/></svg></span>'+
+        '<div class="sess-main"><div class="sess-nm">'+esc(s.label||s.name)+'</div>'+
+        '<div class="sess-meta"><span>'+esc(s.programme_label||s.programme_code||'')+'</span><span>'+esc(s.academic_year||'')+'</span><span>Dépôts : '+esc(API.fmtDate(s.opens_on))+' → '+esc(API.fmtDate(s.closes_on))+'</span></div></div>'+
+        '<div class="sess-side"><span class="em-badge em-badge--'+(s.is_open?'success':'neutral')+' em-badge--sm"><span class="em-badge-dot"></span>'+(s.is_open?'Ouverte':'Fermée')+'</span>'+
+        (s.is_open && window.__emelaRole==='dir' ? ' <button type="button" class="em-btn em-btn--secondary em-btn--sm" data-close-session="'+esc(s.name)+'" data-label="'+esc(s.label||s.name)+'">Clôturer…</button>' : '')+
+        '</div></div>'
+      ).join('') || '<p class="t-muted" style="padding:var(--space-6)">Aucune session.</p>';
+
+      /* W4 (B0.3/B0.4) : clôture de session — PRÉVISUALISATION (dry-run serveur) puis
+         confirmation explicite. Bascule en masse : instruits→REF, non-aboutis→DES,
+         candidats notifiés ; la rétention prend ensuite le relais. */
+      document.getElementById('sessions-list').addEventListener('click', async e => {
+        const btn = e.target.closest('[data-close-session]'); if(!btn) return;
+        const id = btn.dataset.closeSession, label = btn.dataset.label;
+        try {
+          const prev = (await API.closeSession(id, null, true)).data || {};
+          const lines = Object.entries(prev.bascules||{}).map(([k,v])=>k+' : '+v+' dossier(s)').join('\n') || 'Aucun dossier à basculer.';
+          window.EmelaUI.emModal({
+            title: 'Clôturer la session — '+label,
+            lead: 'PRÉVISUALISATION ('+(prev.total||0)+' dossier(s)) :\n'+lines+'\n\nIRRÉVERSIBLE : la session ferme, les instruits passent en REF (mail motivé), les non-aboutis en DES (mail neutre).',
+            fields: [{name:'motif',label:'Motif notifié (vide = motif générique de clôture)',type:'text'}],
+            submitLabel: 'Clôturer définitivement',
+            onSubmit: async v => {
+              const res = (await API.closeSession(id, v.motif||null, false)).data || {};
+              window.EmelaUI.emToast('Session clôturée — '+(res.refuses||0)+' REF, '+(res.desistes||0)+' DES'+(res.echecs?(', '+res.echecs+' échec(s)'):'.'),'success');
+              window.onEmelaRole();
+            },
+          });
+        } catch(err){ window.EmelaUI.emToast('['+(err.code||'ERR')+'] '+err.message,'error'); }
+      });
+
+      document.getElementById('frais-rows').innerHTML = (frais||[]).map(f =>
+        '<tr><td class="code-cell">'+esc(f.name)+'</td><td>'+esc(f.program_code)+'</td><td>'+esc(f.level_code)+'</td><td>'+esc(f.fee_type)+'</td><td><span class="fee-amt">'+esc(API.fmtXOF(f.amount_xof))+'</span></td></tr>'
+      ).join('') || '<tr><td colspan="5" class="t-muted">Catalogue vide (synchronisation UF à lancer).</td></tr>';
+
+      document.getElementById('promos-rows').innerHTML = (promos||[]).map(p =>
+        '<tr><td class="code-cell">'+esc(p.mirror_key)+'</td><td>'+esc(p.promo_name)+'</td><td>'+(Math.round(p.rate*1000)/10)+' %</td><td>'+esc(API.fmtDate(p.start_date))+' → '+esc(API.fmtDate(p.end_date))+'</td><td>'+esc(p.program||'Tous')+'</td></tr>'
+      ).join('') || '<tr><td colspan="5" class="t-muted">Aucune promotion répliquée.</td></tr>';
+
+      document.getElementById('bourses-rows').innerHTML = (bourses||[]).map(b =>
+        '<tr><td class="code-cell">'+esc(b.mirror_key)+'</td><td>'+esc(b.scholarship_name)+'</td><td>'+esc(b.category||'')+'</td><td>'+(Math.round(b.rate*1000)/10)+' %</td><td>'+esc(b.exclusivity_group||'—')+'</td></tr>'
+      ).join('') || '<tr><td colspan="5" class="t-muted">Aucune bourse répliquée.</td></tr>';
+    } catch(e){
+      if(e.code!=='AUTH') window.EmelaUI.emToast('['+e.code+'] '+e.message,'error');
+    }
+  };
+})();
+</script>
+
+
+</Layout>

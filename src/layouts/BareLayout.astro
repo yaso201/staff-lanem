@@ -1,0 +1,21 @@
+---
+import '@emela/design-system/index.css';
+
+interface Props { title: string; }
+const { title } = Astro.props;
+const apiBase = import.meta.env.PUBLIC_API_BASE || 'http://admission-dev.localhost:8000';
+---
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <script is:inline define:vars={{ apiBase }}>window.EMELA_API_BASE = apiBase;</script>
+  </head>
+  <body>
+    <slot />
+    <script is:inline src="/scripts/api.js"></script>
+    <script is:inline src="/scripts/ui.js"></script>
+  </body>
+</html>

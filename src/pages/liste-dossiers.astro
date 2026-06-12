@@ -1,0 +1,263 @@
+---
+import Layout from '../layouts/Layout.astro';
+---
+<Layout title="Dossiers de candidature — Front management" role="admin" page="dossiers" shared>
+<style is:global>
+
+  body { background: var(--surface-canvas); }
+
+  /* Presets (files de travail par rôle) */
+  .presets { display: flex; gap: var(--space-3); flex-wrap: wrap; margin-bottom: var(--space-6); }
+  .preset { display: inline-flex; align-items: center; gap: var(--space-3); padding: var(--space-3) var(--space-5); border: 1px solid var(--border-default); border-radius: var(--radius-full); background: var(--surface-paper); font-size: var(--text-sm); font-weight: 600; color: var(--text-secondary); cursor: pointer; transition: all var(--duration-fast) var(--ease-out); white-space: nowrap; }
+  .preset:hover { border-color: var(--border-strong); color: var(--text-primary); }
+  .preset.is-active { background: var(--ink-900); border-color: var(--ink-900); color: #fff; }
+  .preset .cnt { font-variant-numeric: tabular-nums; font-size: var(--text-xs); padding: 1px 7px; border-radius: 999px; background: var(--sand-100); color: var(--text-secondary); }
+  .preset.is-active .cnt { background: rgba(255,255,255,0.20); color: #fff; }
+  .preset.is-key { border-color: var(--accent-200); }
+  .preset.is-key .cnt { background: var(--accent-100); color: var(--accent-700); }
+  .preset.is-active.is-key { background: var(--accent-500); border-color: var(--accent-500); }
+  .preset.is-active.is-key .cnt { background: rgba(255,255,255,0.25); }
+
+  /* Toolbar */
+  .toolbar { display: flex; align-items: center; gap: var(--space-4); flex-wrap: wrap; margin-bottom: var(--space-5); }
+  .search { position: relative; flex: 1; min-width: 240px; max-width: 380px; }
+  .search svg { position: absolute; left: var(--space-5); top: 50%; transform: translateY(-50%); color: var(--text-tertiary); width: 17px; height: 17px; pointer-events: none; }
+  .search input { width: 100%; height: 42px; border: 1px solid var(--border-default); border-radius: var(--radius-sm); background: var(--surface-paper); padding: 0 var(--space-5) 0 44px; font-size: var(--text-sm); color: var(--text-primary); }
+  .search input:focus { outline: none; border-color: var(--border-focus); box-shadow: var(--shadow-focus); }
+  .tb-select { height: 42px; border: 1px solid var(--border-default); border-radius: var(--radius-sm); background: var(--surface-paper); padding: 0 var(--space-8) 0 var(--space-4); font-size: var(--text-sm); color: var(--text-primary); font-weight: 500; cursor: pointer; appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236D6557' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right var(--space-4) center; background-size: 15px; }
+  .tb-select:focus { outline: none; border-color: var(--border-focus); box-shadow: var(--shadow-focus); }
+  .tb-spacer { flex: 1; }
+  .tb-count { font-size: var(--text-sm); color: var(--text-tertiary); white-space: nowrap; }
+  .tb-count b { color: var(--text-primary); font-weight: 600; }
+
+  /* Table */
+  .em-table tbody tr { cursor: pointer; }
+  .cand { display: flex; align-items: center; gap: var(--space-4); }
+  .cand-av { width: 34px; height: 34px; border-radius: 50%; background: var(--ink-100); color: var(--ink-800); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 12px; flex-shrink: 0; }
+  .cand-nm { font-size: var(--text-sm); font-weight: 600; color: var(--text-primary); white-space: nowrap; }
+  .cand-lv { font-size: var(--text-xs); color: var(--text-tertiary); margin-top: 1px; white-space: nowrap; }
+  .code-cell { font-family: var(--font-mono); font-size: var(--text-xs); color: var(--text-secondary); white-space: nowrap; }
+  .prog-cell { font-size: var(--text-sm); color: var(--text-primary); }
+  .prog-cell .sess { font-size: var(--text-xs); color: var(--text-tertiary); margin-top: 1px; }
+  .ind { display: inline-flex; align-items: center; gap: var(--space-3); font-size: var(--text-xs); color: var(--text-secondary); white-space: nowrap; }
+  .ind .d { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+  .ind .d.paye { background: var(--success-500); } .ind .d.attente { background: var(--warning-500); } .ind .d.na { background: var(--sand-300); }
+  .date-cell { font-size: var(--text-xs); color: var(--text-tertiary); white-space: nowrap; }
+  .row-go { color: var(--text-tertiary); width: 16px; height: 16px; }
+  .em-table tbody tr:hover .row-go { color: var(--ink-700); }
+  .b-tag { font-size: var(--text-2xs); font-weight: 600; padding: 2px 8px; border-radius: 999px; white-space: nowrap; }
+  .b-tag.aucune { background: transparent; color: var(--sand-400); }
+  .b-tag.demandee { background: var(--ink-50); color: var(--ink-700); }
+  .b-tag.proposee { background: var(--accent-100); color: var(--accent-700); }
+  .b-tag.validee { background: var(--success-50); color: var(--success-700); }
+
+  .empty-row td { padding: var(--space-11) var(--space-7); text-align: center; }
+  @media (max-width: 900px){ .hide-md { display: none; } }
+
+</style>
+
+
+<svg style="display:none" aria-hidden="true">
+  <symbol id="i-folders" viewBox="0 0 256 256"><path d="M216,72H131.31L104,44.69A15.86,15.86,0,0,0,92.69,40H40A16,16,0,0,0,24,56V200.62A15.4,15.4,0,0,0,39.38,216H216.89A15.13,15.13,0,0,0,232,200.89V88A16,16,0,0,0,216,72ZM40,56H92.69l16,16H40Z"/></symbol>
+  <symbol id="i-search" viewBox="0 0 256 256"><path d="M229.66,218.34l-50.07-50.06a88.11,88.11,0,1,0-11.31,11.31l50.06,50.07a8,8,0,0,0,11.32-11.32ZM40,112a72,72,0,1,1,72,72A72.08,72.08,0,0,1,40,112Z"/></symbol>
+  <symbol id="i-caretright" viewBox="0 0 256 256"><path d="M181.66,133.66l-80,80a8,8,0,0,1-11.32-11.32L164.69,128,90.34,53.66a8,8,0,0,1,11.32-11.32l80,80A8,8,0,0,1,181.66,133.66Z"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 256 256"><path d="M224,128a8,8,0,0,1-8,8H136v80a8,8,0,0,1-16,0V136H40a8,8,0,0,1,0-16h80V40a8,8,0,0,1,16,0v80h80A8,8,0,0,1,224,128Z"/></symbol>
+  <symbol id="i-coins" viewBox="0 0 256 256"><path d="M184,89.57V84c0-25.08-37.83-44-88-44S8,58.92,8,84v40c0,20.89,26.25,37.49,64,42.46V172c0,25.08,37.83,44,88,44s88-18.92,88-44V132C248,111.3,222.58,94.68,184,89.57Z"/></symbol>
+  <symbol id="i-tray" viewBox="0 0 256 256"><path d="M216,40H40A16,16,0,0,0,24,56V200a16,16,0,0,0,16,16H216a16,16,0,0,0,16-16V56A16,16,0,0,0,216,40Zm0,160H40V152H82.75l11.77,23.58A8,8,0,0,0,101.66,180h52.68a8,8,0,0,0,7.16-4.42L173.25,152H216v48Zm0-64H168a8,8,0,0,0-7.16,4.42L149.06,164H106.94L95.16,140.42A8,8,0,0,0,88,136H40V56H216v80Z"/></symbol>
+  <symbol id="i-gauge" viewBox="0 0 256 256"><path d="M207.06,72.67A111.24,111.24,0,0,0,128,40h-.4C66.07,40.21,16,90.78,16,152.62V184a16,16,0,0,0,16,16H224a16,16,0,0,0,16-16V152C240,121.57,228.29,93.05,207.06,72.67ZM176.4,116.93l-29,29a20,20,0,1,1-11.31-11.31l29-29a8,8,0,0,1,11.32,11.32Z"/></symbol>
+  <symbol id="i-chart" viewBox="0 0 256 256"><path d="M232,208a8,8,0,0,1-8,8H32a8,8,0,0,1-8-8V48a8,8,0,0,1,16,0V152.69l50.34-50.35a8,8,0,0,1,11.32,0L128,132.69,180.69,80H160a8,8,0,0,1,0-16h40a8,8,0,0,1,8,8v40a8,8,0,0,1-16,0V91.31l-58.34,58.35a8,8,0,0,1-11.32,0L96,119.31l-56,56V200H224A8,8,0,0,1,232,208Z"/></symbol>
+</svg>
+
+<!-- Barre supérieure -->
+<header class="app-top">
+  <div class="app-top-inner">
+    <div class="brand">emela<span>.</span></div>
+    <nav class="nav">
+      <a data-roles="admin" href="/espace-administratif"><svg class="ico-sm"><use href="#i-tray"/></svg>Espace de traitement</a>
+      <a data-roles="resp" href="/cockpit-responsable"><svg class="ico-sm"><use href="#i-gauge"/></svg>Cockpit</a>
+      <a data-roles="dir" href="/tableau-direction"><svg class="ico-sm"><use href="#i-chart"/></svg>Tableau de bord</a>
+      <a href="/liste-dossiers" class="is-active" data-page="dossiers"><svg class="ico-sm"><use href="#i-folders"/></svg>Dossiers</a>
+      <a data-roles="dir" href="/gestion-sessions"><svg class="ico-sm"><use href="#i-coins"/></svg>Sessions &amp; frais</a>
+    </nav>
+    <div class="app-user">
+      <div class="meta"><div class="nm">Estelle Gbaguidi</div><div class="rl">Agent d'admission</div></div>
+      <div class="av">EG</div>
+    </div>
+  </div>
+</header>
+
+<main class="page">
+  <div class="page-head">
+    <div>
+      <h1 class="page-title">Dossiers de candidature</h1>
+      <p class="page-sub">La colonne vertébrale du traitement des admissions — files de travail selon votre rôle.</p>
+    </div>
+  </div>
+
+  <!-- Files de travail (presets par rôle) -->
+  <div class="presets" id="presets"></div>
+
+  <!-- Toolbar -->
+  <div class="toolbar">
+    <div class="search">
+      <svg><use href="#i-search"/></svg>
+      <input type="search" id="q" placeholder="Rechercher un nom ou un code…" aria-label="Rechercher" />
+    </div>
+    <select class="tb-select" id="f-prog" aria-label="Programme">
+      <option value="">Tous programmes</option>
+    </select>
+    <select class="tb-select" id="f-sess" aria-label="Session">
+      <option value="">Toutes sessions</option>
+    </select>
+    <select class="tb-select" id="f-sort" aria-label="Trier">
+      <option value="recent">Plus récents</option>
+      <option value="ancien">Plus anciens</option>
+      <option value="nom">Nom (A→Z)</option>
+    </select>
+    <div class="tb-spacer"></div>
+    <div class="tb-count"><b id="count">0</b> dossier(s)</div>
+  </div>
+
+  <!-- Table -->
+  <div class="em-table-wrap">
+    <table class="em-table">
+      <thead>
+        <tr>
+          <th>Code</th>
+          <th>Candidat</th>
+          <th class="hide-md">Programme · session</th>
+          <th>Statut</th>
+          <th class="hide-md">Paiement</th>
+          <th class="hide-md">Bourse</th>
+          <th>Soumis</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody id="rows"></tbody>
+    </table>
+  </div>
+</main>
+
+<script is:inline>
+/* C4-FRONT — liste branchée sur staff.list_dossiers (frappe.get_list → DocPerms + DEC-262).
+   Les files de travail (presets) sont calculées sur les indicateurs SERVEUR de chaque
+   dossier (statut, bourse, notes, paiement à confirmer, pièces manquantes). */
+(function(){
+  const API = window.EmelaAPI, esc = window.EmelaUI.esc;
+  const STATE = {
+    BRO:{cls:'st--bro',label:'Brouillon'}, SOP:{cls:'st--sop',label:'Soumis (prov.)'},
+    SOU:{cls:'st--sou',label:'Soumis'}, INC:{cls:'st--inc',label:'Incomplet'},
+    ETU:{cls:'st--etu',label:'En étude'}, ATT:{cls:'st--att',label:"Liste d'attente"},
+    ADM:{cls:'st--adm',label:'Admis'}, ACO:{cls:'st--aco',label:'Admis sous réserve'},
+    ACC:{cls:'st--acc',label:'Accepté'}, INS:{cls:'st--ins',label:'Inscrit'},
+    REF:{cls:'st--ref',label:'Refusé'}, DES:{cls:'st--des',label:'Désisté'}
+  };
+
+  // Files de travail par rôle — prédicats sur les INDICATEURS SERVEUR
+  const PRESETS = {
+    admin: [
+      {key:'sop',    label:'Paiements à confirmer', isKey:true,  pred:d=>d.paiement_a_confirmer},
+      {key:'sou',    label:'À mettre en étude',     isKey:true,  pred:d=>d.statut==='SOU'},
+      {key:'inc',    label:'Incomplets',            isKey:false, pred:d=>d.statut==='INC'},
+      {key:'notes',  label:'Notes à saisir',        isKey:false, pred:d=>d.is_prepa && d.statut==='ETU' && d.notes==='absentes'},
+      {key:'all',    label:'Tous les dossiers',     isKey:false, pred:()=>true}
+    ],
+    resp: [
+      {key:'enetude', label:'En étude',             isKey:true,  pred:d=>d.statut==='ETU'},
+      {key:'attente', label:"Liste d'attente",      isKey:false, pred:d=>d.statut==='ATT'},
+      {key:'notesv',  label:'Notes à valider',      isKey:true,  pred:d=>d.notes==='saisies'},
+      {key:'bourse',  label:'Bourses à proposer',   isKey:false, pred:d=>d.bourse==='demandee' && (d.statut==='ETU'||d.statut==='ATT')},
+      {key:'all',     label:'Tous les dossiers',    isKey:false, pred:()=>true}
+    ],
+    dir: [
+      {key:'valider',    label:'À valider (ADM→ACC)', isKey:true, pred:d=>d.statut==='ADM'},
+      {key:'conditions', label:'Conditions (ACO)',     isKey:true, pred:d=>d.statut==='ACO'},
+      {key:'inscrire',   label:'À inscrire (ACC→INS)', isKey:true, pred:d=>d.statut==='ACC'},
+      {key:'all',        label:'Tous les dossiers',    isKey:false, pred:()=>true}
+    ]
+  };
+
+  let role=null, DATA=[], activePreset=null;
+  const elPresets=document.getElementById('presets'), elRows=document.getElementById('rows'),
+        elCount=document.getElementById('count'), q=document.getElementById('q'),
+        fProg=document.getElementById('f-prog'), fSess=document.getElementById('f-sess'),
+        fSort=document.getElementById('f-sort');
+
+  function fillFilters(){
+    const progs={}, sess={};
+    DATA.forEach(d=>{ if(d.programme.code) progs[d.programme.code]=d.programme.label||d.programme.code; if(d.session) sess[d.session]=d.session; });
+    fProg.innerHTML='<option value="">Tous programmes</option>'+Object.entries(progs).map(([c,l])=>'<option value="'+esc(c)+'">'+esc(l)+'</option>').join('');
+    fSess.innerHTML='<option value="">Toutes sessions</option>'+Object.keys(sess).map(s=>'<option value="'+esc(s)+'">'+esc(s)+'</option>').join('');
+  }
+
+  function renderPresets(){
+    const list = PRESETS[role]||PRESETS.admin;
+    if(!list.some(p=>p.key===activePreset)) activePreset=list[0].key;
+    elPresets.innerHTML='';
+    list.forEach(p=>{
+      const n=DATA.filter(p.pred).length;
+      const btn=document.createElement('button');
+      btn.className='preset'+(p.isKey?' is-key':'')+(p.key===activePreset?' is-active':'');
+      btn.innerHTML=esc(p.label)+' <span class="cnt">'+n+'</span>';
+      btn.addEventListener('click',()=>{ activePreset=p.key; renderPresets(); renderRows(); });
+      elPresets.appendChild(btn);
+    });
+  }
+
+  function renderRows(){
+    const list=PRESETS[role]||PRESETS.admin;
+    const pred=(list.find(x=>x.key===activePreset)||list[0]).pred;
+    const term=q.value.trim().toLowerCase();
+    let rows=DATA.filter(pred).filter(d=>{
+      if(fProg.value && d.programme.code!==fProg.value) return false;
+      if(fSess.value && d.session!==fSess.value) return false;
+      if(term && !(d.nom.toLowerCase().includes(term)||d.dossier_id.toLowerCase().includes(term))) return false;
+      return true;
+    });
+    const sort=fSort.value;
+    rows.sort((a,b)=> sort==='nom'?a.nom.localeCompare(b.nom): sort==='ancien'? a.soumis_le.localeCompare(b.soumis_le): b.modifie_le.localeCompare(a.modifie_le));
+    elCount.textContent=rows.length;
+    elRows.innerHTML='';
+    if(!rows.length){
+      elRows.innerHTML='<tr class="empty-row"><td colspan="8"><div class="em-empty"><div class="em-empty-icon"><svg class="ico-lg"><use href="#i-folders"/></svg></div><div class="em-empty-title">Aucun dossier</div><div class="em-empty-desc">Aucun dossier ne correspond à cette file de travail et à ces filtres.</div></div></td></tr>';
+      return;
+    }
+    rows.forEach(d=>{
+      const s=STATE[d.statut]||{cls:'',label:d.statut};
+      const init=(d.nom||'?').split(/\s+/).map(w=>w[0]).slice(0,2).join('').toUpperCase();
+      const fr1=d.frais.application||d.frais.competition;
+      const payLabel=d.paiement_a_confirmer?'À confirmer':(fr1==='Paid'?'Payé':(fr1?'En attente':'—'));
+      const payCls=d.paiement_a_confirmer?'attente':(fr1==='Paid'?'paye':'na');
+      const bLabel={aucune:'—',demandee:'Demandée',proposee:'Proposée',validee:'Validée'}[d.bourse];
+      const tr=document.createElement('tr');
+      tr.innerHTML='<td class="code-cell">'+esc(d.dossier_id)+'</td>'+
+        '<td><div class="cand"><span class="cand-av">'+esc(init)+'</span><div><div class="cand-nm">'+esc(d.nom)+'</div><div class="cand-lv">'+esc(d.level_code||'')+'</div></div></div></td>'+
+        '<td class="hide-md"><div class="prog-cell">'+esc(d.programme.label||d.programme.code||'')+'<div class="sess">'+esc(d.session||'')+'</div></div></td>'+
+        '<td><span class="st '+s.cls+'"><span class="st-dot"></span>'+esc(s.label)+'<span class="st-code">'+esc(d.statut)+'</span></span></td>'+
+        '<td class="hide-md"><span class="ind"><span class="d '+payCls+'"></span>'+esc(payLabel)+'</span></td>'+
+        '<td class="hide-md"><span class="b-tag '+esc(d.bourse)+'">'+esc(bLabel)+'</span></td>'+
+        '<td class="date-cell">'+esc(API.fmtDate(d.soumis_le))+'</td>'+
+        '<td style="text-align:right"><svg class="row-go"><use href="#i-caretright"/></svg></td>';
+      tr.addEventListener('click',()=>{ window.location.href='/dossier?c='+encodeURIComponent(d.dossier_id); });
+      elRows.appendChild(tr);
+    });
+  }
+
+  async function load(){
+    DATA=(await API.listDossiers()).dossiers;
+    fillFilters(); renderPresets(); renderRows();
+  }
+
+  window.onEmelaRole=function(r){
+    role=r;
+    const want=new URLSearchParams(location.search).get('preset');
+    if(want && (PRESETS[r]||[]).some(p=>p.key===want)) activePreset=want;
+    load().catch(e=>{ if(e.code!=='AUTH') window.EmelaUI.emToast('['+e.code+'] '+e.message,'error'); });
+  };
+  [q,fProg,fSess,fSort].forEach(el=>el.addEventListener('input',renderRows));
+})();
+</script>
+
+
+</Layout>

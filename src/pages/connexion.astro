@@ -1,0 +1,148 @@
+---
+import BareLayout from '../layouts/BareLayout.astro';
+---
+<BareLayout title="Connexion — Front management des admissions">
+<style is:global>
+
+  body { background: var(--surface-canvas); }
+  .ico { width: 18px; height: 18px; flex-shrink: 0; }
+  .ico-sm { width: 15px; height: 15px; flex-shrink: 0; }
+
+  .split { min-height: 100vh; display: grid; grid-template-columns: 1.05fr 1fr; }
+  @media (max-width: 860px){ .split { grid-template-columns: 1fr; } .brandpane { display: none; } }
+
+  /* Volet de marque */
+  .brandpane { background: linear-gradient(165deg, var(--ink-900), var(--ink-950)); color: #fff; padding: var(--space-12) var(--space-11); display: flex; flex-direction: column; justify-content: space-between; position: relative; overflow: hidden; }
+  .brandpane::after { content: ''; position: absolute; right: -120px; top: -120px; width: 360px; height: 360px; border-radius: 50%; background: radial-gradient(circle, rgba(245,158,11,0.22), transparent 70%); }
+  .bp-brand { font-family: var(--font-display); font-size: 26px; font-weight: 700; letter-spacing: -0.02em; position: relative; }
+  .bp-brand span { color: var(--accent-500); }
+  .bp-mid { position: relative; }
+  .bp-eyebrow { font-size: var(--text-2xs); font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: var(--accent-200); }
+  .bp-h { font-family: var(--font-display); font-size: var(--text-3xl); font-weight: 700; letter-spacing: -0.02em; line-height: 1.12; margin-top: var(--space-5); max-width: 14ch; }
+  .bp-p { font-size: var(--text-md); color: rgba(255,255,255,0.74); margin-top: var(--space-5); max-width: 40ch; line-height: var(--leading-normal); }
+  .bp-points { margin-top: var(--space-9); display: flex; flex-direction: column; gap: var(--space-5); position: relative; }
+  .bp-point { display: flex; gap: var(--space-4); align-items: flex-start; font-size: var(--text-sm); color: rgba(255,255,255,0.8); }
+  .bp-point svg { color: var(--accent-500); flex-shrink: 0; margin-top: 1px; }
+  .bp-point b { color: #fff; font-weight: 600; }
+  .bp-foot { font-size: var(--text-xs); color: rgba(255,255,255,0.45); position: relative; }
+
+  /* Volet formulaire */
+  .formpane { display: flex; align-items: center; justify-content: center; padding: var(--space-10) var(--space-9); }
+  .login { width: 100%; max-width: 400px; }
+  .login-h { font-family: var(--font-display); font-size: var(--text-2xl); font-weight: 700; letter-spacing: -0.02em; }
+  .login-sub { font-size: var(--text-sm); color: var(--text-secondary); margin-top: var(--space-3); margin-bottom: var(--space-8); }
+
+  .field { margin-bottom: var(--space-5); }
+  .field label { display: block; font-size: var(--text-sm); font-weight: 600; color: var(--text-primary); margin-bottom: var(--space-3); }
+
+  .demo-label { font-size: var(--text-2xs); font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-tertiary); margin: var(--space-8) 0 var(--space-4); display: flex; align-items: center; gap: var(--space-3); }
+  .demo-label::after { content: ''; flex: 1; height: 1px; background: var(--border-subtle); }
+  .profiles { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-3); margin-bottom: var(--space-7); }
+  .profile { display: flex; flex-direction: column; align-items: center; gap: var(--space-3); padding: var(--space-5) var(--space-3); border: 1.5px solid var(--border-default); border-radius: var(--radius-md); background: var(--surface-paper); cursor: pointer; transition: all var(--duration-fast) var(--ease-out); text-align: center; }
+  .profile:hover { border-color: var(--border-strong); }
+  .profile .pdot { width: 10px; height: 10px; border-radius: 50%; }
+  .profile[data-role="admin"] .pdot { background: var(--role-admin); }
+  .profile[data-role="resp"] .pdot { background: var(--accent-500); }
+  .profile[data-role="dir"] .pdot { background: var(--role-direction); }
+  .profile .pnm { font-size: var(--text-sm); font-weight: 600; color: var(--text-primary); }
+  .profile .pr { font-size: var(--text-2xs); color: var(--text-tertiary); }
+  .profile.is-active { border-color: var(--ink-800); background: var(--ink-50); box-shadow: 0 0 0 1px var(--ink-800); }
+
+  .login-foot { margin-top: var(--space-6); font-size: var(--text-xs); color: var(--text-tertiary); display: flex; gap: var(--space-3); align-items: flex-start; line-height: var(--leading-normal); }
+  .login-foot svg { color: var(--ink-600); flex-shrink: 0; margin-top: 1px; }
+  .forgot { font-size: var(--text-sm); color: var(--text-link); text-decoration: none; }
+  .forgot:hover { text-decoration: underline; }
+
+</style>
+
+
+<svg style="display:none" aria-hidden="true">
+  <symbol id="i-shield" viewBox="0 0 256 256"><path d="M208,40H48A16,16,0,0,0,32,56v58.77c0,89.61,75.82,119.34,91,124.39a15.53,15.53,0,0,0,10,0c15.2-5.05,91-34.78,91-124.39V56A16,16,0,0,0,208,40Zm-34.34,69.66-56,56a8,8,0,0,1-11.32,0l-24-24a8,8,0,0,1,11.32-11.32L112,148.69l50.34-50.35a8,8,0,0,1,11.32,11.32Z"/></symbol>
+  <symbol id="i-users" viewBox="0 0 256 256"><path d="M117.25,157.92a60,60,0,1,0-66.5,0A95.83,95.83,0,0,0,3.53,195.63a8,8,0,1,0,13.4,8.74,80,80,0,0,1,134.14,0,8,8,0,0,0,13.4-8.74A95.83,95.83,0,0,0,117.25,157.92ZM40,108a44,44,0,1,1,44,44A44.05,44.05,0,0,1,40,108Zm210.14,98.7a8,8,0,0,1-11.07-2.33A79.83,79.83,0,0,0,172,168a8,8,0,0,1,0-16,44,44,0,1,0-16.34-84.87,8,8,0,1,1-5.94-14.85,60,60,0,0,1,55.53,105.64,95.83,95.83,0,0,1,47.22,37.71A8,8,0,0,1,250.14,206.7Z"/></symbol>
+  <symbol id="i-lock" viewBox="0 0 256 256"><path d="M208,80H176V56a48,48,0,0,0-96,0V80H48A16,16,0,0,0,32,96V208a16,16,0,0,0,16,16H208a16,16,0,0,0,16-16V96A16,16,0,0,0,208,80ZM96,56a32,32,0,0,1,64,0V80H96Zm32,128a20,20,0,1,1,20-20A20,20,0,0,1,128,184Z"/></symbol>
+  <symbol id="i-caretright" viewBox="0 0 256 256"><path d="M181.66,133.66l-80,80a8,8,0,0,1-11.32-11.32L164.69,128,90.34,53.66a8,8,0,0,1,11.32-11.32l80,80A8,8,0,0,1,181.66,133.66Z"/></symbol>
+  <symbol id="i-flow" viewBox="0 0 256 256"><path d="M200,152a31.84,31.84,0,0,0-19.53,6.68l-23.11-18A31.65,31.65,0,0,0,160,128c0-.74,0-1.48-.08-2.21l13.23-4.41A32,32,0,1,0,168,96c0,.74,0,1.48.08,2.21l-13.23,4.41A32,32,0,0,0,128,88a32.06,32.06,0,0,0-26.34,13.78l-31.06-13a32,32,0,1,0-6.34,14.69l31.07,13a32,32,0,0,0,3,18.41L74.36,170.5A32,32,0,1,0,88,200a32.21,32.21,0,0,0-2.81-13.13l24.94-19.5A32,32,0,1,0,200,152Z"/></symbol>
+</svg>
+
+<main class="split">
+  <!-- Volet de marque -->
+  <aside class="brandpane">
+    <div class="bp-brand">emela<span>.</span></div>
+    <div class="bp-mid">
+      <span class="bp-eyebrow">Front management · Admissions</span>
+      <h1 class="bp-h">Un seul outil, adapté à chaque rôle.</h1>
+      <p class="bp-p">L'application présente à chacun ce qu'il a le droit de faire — et masque le reste. La séparation des pouvoirs est garantie côté écran comme côté serveur.</p>
+      <div class="bp-points">
+        <div class="bp-point"><svg class="ico"><use href="#i-users"/></svg><span><b>Administratif, Responsable, Direction</b> — chaque profil, ses files de travail.</span></div>
+        <div class="bp-point"><svg class="ico"><use href="#i-shield"/></svg><span><b>Double barrière</b> — le front masque, Frappe refuse (ADR-004).</span></div>
+        <div class="bp-point"><svg class="ico"><use href="#i-flow"/></svg><span><b>Du dépôt à l'inscription</b> — BRO → SOU → ETU → ADM → ACC → INS.</span></div>
+      </div>
+    </div>
+    <div class="bp-foot">Authentification déléguée à Frappe · accès inter-domaines sécurisé</div>
+  </aside>
+
+  <!-- Volet formulaire -->
+  <section class="formpane">
+    <form class="login" id="login" autocomplete="off">
+      <h2 class="login-h">Connexion</h2>
+      <p class="login-sub">Accédez à votre espace de gestion des admissions.</p>
+
+      <div class="field">
+        <label for="id">Identifiant</label>
+        <input class="em-input" id="id" type="text" placeholder="prenom.nom@lanem.bj" autocomplete="username" />
+      </div>
+      <div class="field">
+        <div style="display:flex;align-items:baseline;justify-content:space-between">
+          <label for="pw">Mot de passe</label>
+        </div>
+        <input class="em-input" id="pw" type="password" placeholder="••••••••" autocomplete="current-password" />
+      </div>
+
+      <div id="login-err" style="display:none;background:var(--danger-50,#fef2f2);color:var(--danger-700,#b91c1c);border-radius:8px;padding:10px 12px;font-size:13px;margin-bottom:14px;line-height:1.45"></div>
+
+      <button type="submit" class="em-btn em-btn--primary em-btn--lg em-btn--block" id="login-btn">Se connecter<svg class="ico"><use href="#i-caretright"/></svg></button>
+
+      <div class="login-foot"><svg class="ico-sm"><use href="#i-lock"/></svg><span>Connexion par session Frappe. Vos droits sont déterminés par votre rôle — et vérifiés à chaque action côté serveur.</span></div>
+    </form>
+  </section>
+</main>
+
+<script is:inline>
+// C4-FRONT (DEC-264) : connexion RÉELLE — session native Frappe (cookie sid + CSRF via whoami).
+// L'ancienne gate localStorage (profils de démonstration) est supprimée.
+(function(){
+  const form = document.getElementById('login');
+  const errBox = document.getElementById('login-err');
+  const btn = document.getElementById('login-btn');
+
+  if (new URLSearchParams(location.search).get('expire')) {
+    errBox.textContent = 'Votre session a expiré. Reconnectez-vous.';
+    errBox.style.display = 'block';
+  }
+
+  form.addEventListener('submit', async e => {
+    e.preventDefault();
+    errBox.style.display = 'none';
+    btn.disabled = true;
+    try {
+      const me = await window.EmelaAPI.login(
+        document.getElementById('id').value.trim(),
+        document.getElementById('pw').value
+      );
+      const role = window.EmelaAPI.uxRole(me.roles);
+      window.location.href = { admin: '/espace-administratif', resp: '/cockpit-responsable', dir: '/tableau-direction' }[role];
+    } catch (err) {
+      // AUTH côté whoami = connecté mais sans rôle admission → message dédié
+      errBox.textContent = err.code === 'LOGIN_FAILED'
+        ? 'Identifiant ou mot de passe incorrect.'
+        : (err.code === 'AUTH' || err.httpStatus === 403)
+          ? "Ce compte n'a aucun rôle admission (Administratif, Responsable ou Direction)."
+          : err.message || 'Connexion impossible.';
+      errBox.style.display = 'block';
+      btn.disabled = false;
+    }
+  });
+})();
+</script>
+
+</BareLayout>

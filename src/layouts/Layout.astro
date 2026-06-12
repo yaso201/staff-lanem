@@ -1,0 +1,30 @@
+---
+import '@emela/design-system/index.css';
+import '../styles/shell.css';
+
+interface Props {
+  title: string;
+  role?: 'admin' | 'resp' | 'dir';
+  page?: string;
+  shared?: boolean;
+  prog?: string;
+}
+const { title, role = 'admin', page = '', shared = false, prog } = Astro.props;
+// C4-FRONT : base API configurable au build (recette/prod), défaut = site dev Frappe.
+const apiBase = import.meta.env.PUBLIC_API_BASE || 'http://admission-dev.localhost:8000';
+---
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <script is:inline define:vars={{ apiBase }}>window.EMELA_API_BASE = apiBase;</script>
+  </head>
+  <body data-role={role} data-page={page} data-shared={shared ? '' : undefined} data-prog={prog}>
+    <slot />
+    <script is:inline src="/scripts/api.js"></script>
+    <script is:inline src="/scripts/ui.js"></script>
+    <script is:inline src="/scripts/shell.js"></script>
+  </body>
+</html>

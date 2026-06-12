@@ -1,0 +1,208 @@
+---
+import Layout from '../layouts/Layout.astro';
+---
+<Layout title="Tableau de bord Direction — Pilotage des admissions" role="dir" page="tableau">
+<style is:global>
+
+  body { background: var(--surface-canvas); }
+
+  .filters { display: flex; align-items: center; gap: var(--space-3); flex-wrap: wrap; }
+  .tb-select { height: 40px; border: 1px solid var(--border-default); border-radius: var(--radius-sm); background: var(--surface-paper); padding: 0 var(--space-8) 0 var(--space-4); font-size: var(--text-sm); color: var(--text-primary); font-weight: 500; cursor: pointer; appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236D6557' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right var(--space-4) center; background-size: 15px; }
+  .ro-tag { display: inline-flex; align-items: center; gap: var(--space-3); font-size: var(--text-xs); color: var(--text-tertiary); padding: var(--space-3) var(--space-4); background: var(--sand-50); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); }
+  .ro-tag svg { color: var(--text-tertiary); }
+
+  /* KPI row */
+  .kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--space-4); margin-bottom: var(--space-6); }
+  @media (max-width: 980px){ .kpis { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 520px){ .kpis { grid-template-columns: 1fr; } }
+  .kpi { background: var(--surface-paper); border: 1px solid var(--border-default); border-radius: var(--radius-lg); padding: var(--space-6); }
+  .kpi-l { font-size: var(--text-2xs); font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-tertiary); }
+  .kpi-v { font-family: var(--font-display); font-size: 32px; font-weight: 700; letter-spacing: -0.02em; line-height: 1; color: var(--text-primary); font-variant-numeric: tabular-nums; margin-top: var(--space-4); }
+  .kpi-v small { font-size: var(--text-md); color: var(--text-tertiary); font-weight: 600; }
+  .kpi-m { font-size: var(--text-xs); margin-top: var(--space-3); display: inline-flex; align-items: center; gap: var(--space-2); }
+  .kpi-m.up { color: var(--success-700); } .kpi-m.down { color: var(--error-700); } .kpi-m.flat { color: var(--text-tertiary); }
+
+  .card { background: var(--surface-paper); border: 1px solid var(--border-default); border-radius: var(--radius-lg); overflow: hidden; margin-bottom: var(--space-6); }
+  .card-head { display: flex; align-items: center; justify-content: space-between; gap: var(--space-4); padding: var(--space-6) var(--space-7); border-bottom: 1px solid var(--border-subtle); }
+  .card-title { font-family: var(--font-display); font-size: var(--text-md); font-weight: 600; }
+  .card-sub { font-size: var(--text-xs); color: var(--text-tertiary); margin-top: 2px; }
+  .card-body { padding: var(--space-7); }
+
+  /* Entonnoir */
+  .funnel { display: flex; gap: var(--space-3); align-items: stretch; }
+  @media (max-width: 820px){ .funnel { flex-direction: column; } }
+  .fstage { flex: 1; display: flex; flex-direction: column; gap: var(--space-4); }
+  .fbar-wrap { display: flex; align-items: flex-end; height: 132px; }
+  .fbar { width: 100%; border-radius: var(--radius-sm) var(--radius-sm) 0 0; background: linear-gradient(180deg, var(--ink-700), var(--ink-900)); display: flex; align-items: flex-start; justify-content: center; padding-top: var(--space-3); position: relative; }
+  .fbar .fcount { font-family: var(--font-display); font-size: var(--text-lg); font-weight: 700; color: #fff; font-variant-numeric: tabular-nums; }
+  .fstage.s2 .fbar { background: linear-gradient(180deg, var(--ink-600), var(--ink-800)); }
+  .fstage.s3 .fbar { background: linear-gradient(180deg, var(--accent-500), var(--accent-700)); }
+  .fstage.s4 .fbar { background: linear-gradient(180deg, var(--success-500), var(--success-700)); }
+  .fstage.s5 .fbar { background: linear-gradient(180deg, var(--success-700), var(--success-900)); }
+  .fmeta { text-align: center; }
+  .fmeta .flab { font-size: var(--text-sm); font-weight: 600; color: var(--text-primary); }
+  .fmeta .fcode { font-family: var(--font-mono); font-size: 10px; color: var(--text-tertiary); letter-spacing: 0.05em; }
+  .fdrop { display: flex; align-items: center; justify-content: center; flex: 0 0 64px; padding-top: 54px; }
+  @media (max-width: 820px){ .fdrop { flex-basis: auto; padding: var(--space-2) 0; } }
+  .fdrop span { font-size: var(--text-xs); font-weight: 700; color: var(--error-700); background: var(--error-50); padding: 3px 8px; border-radius: var(--radius-full); white-space: nowrap; }
+
+  /* Deux colonnes */
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-6); }
+  @media (max-width: 920px){ .grid2 { grid-template-columns: 1fr; } }
+
+  .bar-row { display: flex; flex-direction: column; gap: var(--space-5); }
+  .bar { display: grid; grid-template-columns: 150px 1fr 56px; gap: var(--space-4); align-items: center; font-size: var(--text-sm); }
+  .bar-label { color: var(--text-secondary); }
+  .bar-track { background: var(--sand-100); border-radius: 999px; height: 9px; overflow: hidden; }
+  .bar-fill { height: 100%; border-radius: 999px; background: var(--ink-700); }
+  .bar-fill.a { background: var(--accent-500); }
+  .bar-val { font-weight: 700; color: var(--text-primary); font-variant-numeric: tabular-nums; text-align: right; }
+
+  .fill-row { display: flex; flex-direction: column; gap: var(--space-6); }
+  .fill { }
+  .fill-top { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: var(--space-3); }
+  .fill-nm { font-size: var(--text-sm); font-weight: 600; }
+  .fill-meta { font-size: var(--text-xs); color: var(--text-tertiary); font-family: var(--font-mono); }
+  .fill-meta b { color: var(--text-primary); }
+  .fill-track { background: var(--sand-100); height: 12px; border-radius: 999px; overflow: hidden; }
+  .fill-bar { height: 100%; border-radius: 999px; background: linear-gradient(90deg, var(--ink-700), var(--ink-800)); }
+
+  /* Revenus */
+  .rev { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-5); }
+  @media (max-width: 720px){ .rev { grid-template-columns: 1fr; } }
+  .rev-cell { padding: var(--space-5) var(--space-6); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); background: var(--sand-25); }
+  .rev-l { font-size: var(--text-2xs); font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-tertiary); }
+  .rev-v { font-family: var(--font-display); font-size: 24px; font-weight: 700; letter-spacing: -0.02em; color: var(--ink-900); margin-top: var(--space-3); font-variant-numeric: tabular-nums; }
+  .rev-v small { font-size: var(--text-sm); color: var(--text-tertiary); font-weight: 600; }
+  .rev-m { font-size: var(--text-xs); color: var(--text-tertiary); margin-top: var(--space-2); }
+  .rev-cell.total { background: var(--ink-950); border: 0; }
+  .rev-cell.total .rev-l { color: rgba(255,255,255,0.6); }
+  .rev-cell.total .rev-v { color: #fff; }
+  .rev-cell.total .rev-m { color: rgba(255,255,255,0.7); }
+
+</style>
+
+
+<svg style="display:none" aria-hidden="true">
+  <symbol id="i-folders" viewBox="0 0 256 256"><path d="M216,72H131.31L104,44.69A15.86,15.86,0,0,0,92.69,40H40A16,16,0,0,0,24,56V200.62A15.4,15.4,0,0,0,39.38,216H216.89A15.13,15.13,0,0,0,232,200.89V88A16,16,0,0,0,216,72ZM40,56H92.69l16,16H40Z"/></symbol>
+  <symbol id="i-chart" viewBox="0 0 256 256"><path d="M232,208a8,8,0,0,1-8,8H32a8,8,0,0,1-8-8V48a8,8,0,0,1,16,0V152.69l50.34-50.35a8,8,0,0,1,11.32,0L128,132.69,180.69,80H160a8,8,0,0,1,0-16h40a8,8,0,0,1,8,8v40a8,8,0,0,1-16,0V91.31l-58.34,58.35a8,8,0,0,1-11.32,0L96,119.31l-56,56V200H224A8,8,0,0,1,232,208Z"/></symbol>
+  <symbol id="i-cog" viewBox="0 0 256 256"><path d="M128,80a48,48,0,1,0,48,48A48.05,48.05,0,0,0,128,80Zm0,80a32,32,0,1,1,32-32A32,32,0,0,1,128,160Zm88-29.84q.06-2.16,0-4.32l14.92-18.64a8,8,0,0,0,1.48-7.06,107.21,107.21,0,0,0-10.88-26.25,8,8,0,0,0-6-3.93l-23.72-2.64q-1.48-1.56-3-3L186,40.54a8,8,0,0,0-3.94-6,107.71,107.71,0,0,0-26.25-10.87,8,8,0,0,0-7.06,1.49L130.16,40Q128,40,125.84,40L107.2,25.11a8,8,0,0,0-7.06-1.48A107.6,107.6,0,0,0,73.89,34.51a8,8,0,0,0-3.93,6L67.32,64.27q-1.56,1.49-3,3L40.54,70a8,8,0,0,0-6,3.94,107.71,107.71,0,0,0-10.87,26.25,8,8,0,0,0,1.49,7.06L40,125.84Q40,128,40,130.16L25.11,148.8a8,8,0,0,0-1.48,7.06,107.21,107.21,0,0,0,10.88,26.25,8,8,0,0,0,6,3.93l23.72,2.64q1.49,1.56,3,3L70,210.46a8,8,0,0,0,3.94,6,107.71,107.71,0,0,0,26.25,10.87,8,8,0,0,0,7.06-1.49L125.84,216q2.16.06,4.32,0l18.64,14.92a8,8,0,0,0,7.06,1.48,107.21,107.21,0,0,0,26.25-10.88,8,8,0,0,0,3.93-6l2.64-23.72q1.56-1.48,3-3L210.46,186a8,8,0,0,0,6-3.94,107.71,107.71,0,0,0,10.87-26.25,8,8,0,0,0-1.49-7.06Z"/></symbol>
+  <symbol id="i-lock" viewBox="0 0 256 256"><path d="M208,80H176V56a48,48,0,0,0-96,0V80H48A16,16,0,0,0,32,96V208a16,16,0,0,0,16,16H208a16,16,0,0,0,16-16V96A16,16,0,0,0,208,80ZM96,56a32,32,0,0,1,64,0V80H96Zm32,128a20,20,0,1,1,20-20A20,20,0,0,1,128,184Z"/></symbol>
+  <symbol id="i-arrowup" viewBox="0 0 256 256"><path d="M205.66,117.66a8,8,0,0,1-11.32,0L136,59.31V216a8,8,0,0,1-16,0V59.31L61.66,117.66a8,8,0,0,1-11.32-11.32l72-72a8,8,0,0,1,11.32,0l72,72A8,8,0,0,1,205.66,117.66Z"/></symbol>
+  <symbol id="i-arrowdown" viewBox="0 0 256 256"><path d="M205.66,149.66l-72,72a8,8,0,0,1-11.32,0l-72-72a8,8,0,0,1,11.32-11.32L120,196.69V40a8,8,0,0,1,16,0V196.69l58.34-58.35a8,8,0,0,1,11.32,11.32Z"/></symbol>
+</svg>
+
+<!-- Barre supérieure -->
+<header class="app-top">
+  <div class="app-top-inner">
+    <div class="brand">emela<span>.</span></div>
+    <nav class="nav">
+      <a data-roles="dir" href="/tableau-direction" class="is-active"><svg class="ico-sm"><use href="#i-chart"/></svg>Tableau de bord</a>
+      <a href="/liste-dossiers"><svg class="ico-sm"><use href="#i-folders"/></svg>Dossiers</a>
+      <a data-roles="dir" href="/gestion-sessions"><svg class="ico-sm"><use href="#i-cog"/></svg>Sessions &amp; frais</a>
+    </nav>
+    <div class="app-user">
+      <div class="meta"><div class="nm">Pr. Adjovi Mensah</div><div class="rl">Direction</div></div>
+      <div class="av">AM</div>
+    </div>
+  </div>
+</header>
+
+<main class="page">
+  <div class="page-head">
+    <div>
+      <h1 class="page-title">Pilotage des admissions</h1>
+      <p class="page-sub">Vue d'ensemble agrégée — données réelles du back admission.</p>
+    </div>
+    <div class="filters">
+      <span class="ro-tag"><svg class="ico-sm"><use href="#i-lock"/></svg>Lecture seule</span>
+    </div>
+  </div>
+
+  <div class="kpis">
+    <div class="kpi"><div class="kpi-l">Candidatures soumises</div><div class="kpi-v" id="k-sou">—</div><div class="kpi-m flat" id="k-sou-m"></div></div>
+    <div class="kpi"><div class="kpi-l">Conversion → inscription</div><div class="kpi-v" id="k-conv">—</div><div class="kpi-m flat" id="k-conv-m"></div></div>
+    <div class="kpi"><div class="kpi-l">Admis (ADM+ACO+ACC+INS)</div><div class="kpi-v" id="k-adm">—</div><div class="kpi-m flat" id="k-adm-m"></div></div>
+    <div class="kpi"><div class="kpi-l">Inscrits</div><div class="kpi-v" id="k-ins">—</div><div class="kpi-m flat" id="k-ins-m"></div></div>
+  </div>
+
+  <div class="card">
+    <div class="card-head">
+      <div><div class="card-title">Entonnoir d'admission</div><div class="card-sub">Dossiers par étape (états courants)</div></div>
+    </div>
+    <div class="card-body"><div class="funnel" id="funnel"></div></div>
+  </div>
+
+  <div class="grid2">
+    <div class="card" style="margin-bottom:0">
+      <div class="card-head"><div><div class="card-title">Répartition par filière</div><div class="card-sub">Part des dossiers</div></div></div>
+      <div class="card-body"><div class="bar-row" id="filieres"></div></div>
+    </div>
+    <div class="card" style="margin-bottom:0">
+      <div class="card-head"><div><div class="card-title">Sessions</div><div class="card-sub">Inscrits par session</div></div></div>
+      <div class="card-body"><div class="fill-row" id="sessions"></div></div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:var(--space-6); margin-bottom:0">
+    <div class="card-head"><div><div class="card-title">Revenus de frais</div><div class="card-sub">Montants ENCAISSÉS (paiements confirmés) — agrégats serveur, A03</div></div></div>
+    <div class="card-body"><div class="rev" id="revenus"></div></div>
+  </div>
+</main>
+
+<script is:inline>
+/* C4-FRONT — tableau Direction branché sur staff.stats_direction (agrégats lecture seule).
+   Aucun montant calculé côté front : les sommes encaissées viennent du serveur (A03). */
+(function(){
+  const API = window.EmelaAPI, esc = window.EmelaUI.esc;
+  const FEE_LABELS = { application:'Frais de candidature', competition:'Frais de concours', enrollment:"Frais d'inscription (frais 2)" };
+
+  window.onEmelaRole = async function(){
+    let S;
+    try { S = await API.statsDirection(); }
+    catch(e){ if(e.code!=='AUTH') window.EmelaUI.emToast('['+e.code+'] '+e.message,'error'); return; }
+    const st = S.par_statut || {};
+    const n = k => st[k]||0;
+    const total = Object.values(st).reduce((a,b)=>a+b,0);
+    const sou = total - n('BRO') - n('SOP');
+    const admis = n('ADM')+n('ACO')+n('ACC')+n('INS');
+    document.getElementById('k-sou').textContent = sou;
+    document.getElementById('k-sou-m').textContent = total+' dossiers au total';
+    document.getElementById('k-conv').innerHTML = (sou? Math.round(100*n('INS')/sou) : 0)+'<small> %</small>';
+    document.getElementById('k-conv-m').textContent = n('INS')+' inscrits / '+sou+' soumis';
+    document.getElementById('k-adm').textContent = admis;
+    document.getElementById('k-adm-m').textContent = n('REF')+' refusés · '+n('ATT')+" en liste d'attente";
+    document.getElementById('k-ins').textContent = n('INS');
+    document.getElementById('k-ins-m').textContent = n('ACC')+' acceptés en attente de frais 2';
+
+    const steps = [['SOU','Soumis'],['ETU','En étude'],['ADM','Admis'],['ACC','Accepté'],['INS','Inscrit']];
+    const max = Math.max(...steps.map(s=>n(s[0])), 1);
+    document.getElementById('funnel').innerHTML = steps.map(([c,l],i)=>
+      '<div class="fstage s'+(i+1)+'"><div class="fbar-wrap"><div class="fbar" style="height:'+Math.max(Math.round(100*n(c)/max),6)+'%"><span class="fcount">'+n(c)+'</span></div></div>'+
+      '<div class="fmeta"><div class="flab">'+l+'</div><div class="fcode">'+c+'</div></div></div>'
+    ).join('<div class="fdrop"><span>→</span></div>');
+
+    const prog = S.par_programme || {};
+    const ptot = Object.values(prog).reduce((a,b)=>a+b,0) || 1;
+    document.getElementById('filieres').innerHTML = Object.entries(prog).map(([code,count])=>{
+      const pct = Math.round(100*count/ptot);
+      return '<div class="bar"><div class="bar-label">'+esc(code||'?')+'</div><div class="bar-track"><div class="bar-fill" style="width:'+pct+'%"></div></div><div class="bar-val">'+pct+' % ('+count+')</div></div>';
+    }).join('') || '<p class="t-muted">Aucun dossier.</p>';
+
+    document.getElementById('sessions').innerHTML = (S.sessions||[]).map(s=>
+      '<div class="fill"><div class="fill-top"><span class="fill-nm">'+esc(s.label||s.name)+(s.is_open?' · ouverte':' · fermée')+'</span><span class="fill-meta"><b>'+(s.inscrits||0)+'</b> inscrit(s)</span></div>'+
+      '<div class="fill-track"><div class="fill-bar" style="width:'+Math.min((s.inscrits||0)*4,100)+'%"></div></div></div>'
+    ).join('') || '<p class="t-muted">Aucune session.</p>';
+
+    const enc = S.encaisse_xof || {};
+    const totalEnc = Object.values(enc).reduce((a,b)=>a+b,0);
+    document.getElementById('revenus').innerHTML = Object.entries(enc).map(([ft,amt])=>
+      '<div class="rev-cell"><div class="rev-l">'+esc(FEE_LABELS[ft]||ft)+'</div><div class="rev-v">'+esc(API.fmtXOF(amt))+'</div><div class="rev-m">paiements confirmés</div></div>'
+    ).join('')+'<div class="rev-cell total"><div class="rev-l">Total encaissé</div><div class="rev-v">'+esc(API.fmtXOF(totalEnc))+'</div><div class="rev-m">somme serveur</div></div>';
+  };
+})();
+</script>
+
+
+</Layout>
