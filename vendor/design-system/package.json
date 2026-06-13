@@ -1,0 +1,17 @@
+{
+  "name": "@emela/design-system",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "emela design system — tokens, base, composants, palette étendue (source unique)",
+  "exports": {
+    "./index.css": "./src/index.css",
+    "./tokens.css": "./src/tokens.css",
+    "./base.css": "./src/base.css",
+    "./components.css": "./src/components.css",
+    "./palette-ext.css": "./src/palette-ext.css"
+  },
+  "files": [
+    "src"
+  ]
+}

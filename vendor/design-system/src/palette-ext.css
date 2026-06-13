@@ -1,0 +1,34 @@
+/* ============================================================
+   emela Design System — Extension palette chaleureuse
+   ------------------------------------------------------------
+   Enrichissement non destructif : ajoute une famille chaude
+   (crème / sable / argile / ocre), un violet d'ancrage et un
+   contrepoint lagon. Les tokens emela d'origine restent la base.
+   ============================================================ */
+
+:root {
+  /* Fonds chauds */
+  --cream:        #FFFBEB;   /* fond de page par défaut */
+  --sable:        #FBF6EC;   /* sections alternées */
+
+  /* Violet d'ancrage (primary chaud) */
+  --violet:       #452777;   /* blocs d'ancrage, primary chaud */
+  --violet-deep:  #321A5C;   /* hover / pression */
+  --violet-soft:  #F2ECFB;   /* fond sélectionné, tint clair */
+
+  /* Or — énergie & CTA */
+  --gold:         #F59E0B;   /* CTA, accents d'énergie */
+  --gold-deep:    #D97706;   /* hover CTA */
+  --gold-ink:     #1F124A;   /* texte sur or (contraste élevé) */
+
+  /* Argile — info chaleureuse */
+  --clay:         #B45309;
+  --clay-deep:    #7C3A06;
+  --clay-soft:    #FDF1E3;
+  --ochre:        #C2740C;
+
+  /* Lagon — contrepoint froid */
+  --lagoon:       #0E7C86;
+  --lagoon-deep:  #0A5A62;
+  --lagoon-soft:  #E3F0F0;
+}

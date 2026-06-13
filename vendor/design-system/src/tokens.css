@@ -1,0 +1,277 @@
+/* ============================================================
+   emela Design System — Tokens v2
+   ------------------------------------------------------------
+   Source de vérité unique. Tous les composants consomment
+   exclusivement ces variables. Ne jamais coder une couleur ou
+   une taille en dur ailleurs.
+   ============================================================ */
+
+:root {
+  /* ----------------------------------------------------------
+     1. COULEURS
+     ---------------------------------------------------------- */
+
+  /* Ink — violet institutionnel LaNEM */
+  --ink-50:  #F5F2FB;   /* fond ultra-clair, hover discret */
+  --ink-100: #EDE9FE;   /* badges info, fond actif léger (charte LaNEM) */
+  --ink-200: #DDD6FE;   /* bordures actives, rings */
+  --ink-400: #9F86E0;   /* icônes en repos sur fond clair */
+  --ink-600: #5B3FA8;   /* liens */
+  --ink-700: #432A82;   /* liens hover */
+  --ink-800: #2D1B69;   /* bouton primaire (charte LaNEM Primary 700) */
+  --ink-900: #1F124A;   /* titres, items de nav actifs */
+  --ink-950: #110628;   /* contraste maximal, fond foncé éventuel */
+
+  /* Sand — neutres chauds (remplace ln-gray cool) */
+  --sand-25:  #FCFBF8;  /* paper — fond carte sur canvas */
+  --sand-50:  #F8F6F1;  /* canvas — fond de page */
+  --sand-100: #F0EDE5;  /* séparation légère, fond input désactivé */
+  --sand-200: #E4DFD3;  /* bordures par défaut */
+  --sand-300: #C9C2B2;  /* bordures actives, divider fort */
+  --sand-400: #9F9683;  /* texte tertiaire, placeholders, icônes désactivées */
+  --sand-500: #6D6557;  /* texte secondaire, captions */
+  --sand-600: #4D483D;  /* texte body sur paper */
+  --sand-700: #36322B;  /* texte body principal */
+  --sand-800: #1F1C16;  /* sub-titres */
+  --sand-900: #0F0E0A;  /* heading maximal */
+
+  /* Accent — ambre chaleureuse (charte LaNEM Accent 500) */
+  --accent-50:  #FFFBEB;
+  --accent-100: #FEF3C7;
+  --accent-200: #FDE68A;
+  --accent-500: #F59E0B;  /* signature warm — accents ponctuels */
+  --accent-700: #B45309;
+  --accent-900: #78350F;
+
+  /* Sémantiques */
+  --success-50:  #ECFDF5;
+  --success-100: #D1FAE5;
+  --success-500: #10B981;
+  --success-700: #047857;
+  --success-900: #064E3B;
+
+  --warning-50:  #FEF6E7;
+  --warning-100: #FCE7B6;
+  --warning-500: #E08A1A;
+  --warning-700: #B05B0A;
+  --warning-900: #5A2D03;
+
+  --error-50:  #FEF2F2;
+  --error-100: #FEE2E2;
+  --error-500: #EF4444;
+  --error-700: #B91C1C;
+  --error-900: #5B1010;
+
+  --info-50:  var(--ink-50);
+  --info-100: var(--ink-100);
+  --info-500: var(--ink-600);
+  --info-700: var(--ink-700);
+  --info-900: var(--ink-900);
+
+  /* Surface tokens (sémantique de fond) */
+  --surface-canvas:    var(--sand-50);
+  --surface-paper:     #FFFFFF;
+  --surface-raised:    #FFFFFF;
+  --surface-overlay:   rgba(15, 14, 10, 0.55);
+  --surface-inverse:   var(--ink-950);
+  --surface-disabled:  var(--sand-100);
+  --surface-hover:     var(--sand-100);
+  --surface-active:    var(--ink-50);
+
+  /* Border tokens */
+  --border-subtle:  var(--sand-100);
+  --border-default: var(--sand-200);
+  --border-strong:  var(--sand-300);
+  --border-focus:   var(--ink-600);
+  --border-error:   var(--error-500);
+
+  /* Text tokens — utiliser ces aliases sémantiques */
+  --text-primary:    var(--sand-900);
+  --text-secondary:  var(--sand-600);
+  --text-tertiary:   var(--sand-500);
+  --text-placeholder:var(--sand-400);
+  --text-disabled:   var(--sand-400);
+  --text-inverse:    #FFFFFF;
+  --text-link:       var(--ink-600);
+  --text-link-hover: var(--ink-700);
+  --text-success:    var(--success-700);
+  --text-warning:    var(--warning-700);
+  --text-error:      var(--error-700);
+  --text-on-accent:  #FFFFFF;
+
+  /* ----------------------------------------------------------
+     2. TYPOGRAPHIE
+     ---------------------------------------------------------- */
+
+  --font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-display: 'Plus Jakarta Sans', var(--font-sans);
+  --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  /* Échelle modulaire — base 16, ratio 1.2 */
+  --text-2xs:  11px;   /* micro-labels */
+  --text-xs:   12px;   /* captions, metadata */
+  --text-sm:   13px;   /* dense ui */
+  --text-base: 16px;   /* body — 16px standard web, supprime le zoom auto iOS sur les inputs */
+  --text-md:   17px;   /* lead, intro */
+  --text-lg:   20px;   /* h3 */
+  --text-xl:   24px;   /* h2 */
+  --text-2xl:  30px;   /* h1 */
+  --text-3xl:  36px;   /* page title hero */
+  --text-4xl:  44px;   /* display */
+
+  /* Line heights — nommage sémantique */
+  --leading-tight:   1.15;  /* display, headings serrés */
+  --leading-snug:    1.3;   /* h1, h2 */
+  --leading-normal:  1.5;   /* body */
+  --leading-relaxed: 1.65;  /* longues lectures */
+
+  /* Letter spacing */
+  --tracking-tight:  -0.02em;  /* display */
+  --tracking-snug:   -0.01em;  /* h1 */
+  --tracking-normal: 0;
+  --tracking-wide:   0.04em;
+  --tracking-wider:  0.08em;   /* eyebrows */
+  --tracking-widest: 0.16em;   /* micro-eyebrows */
+
+  /* Poids — Plus Jakarta Sans propose 200 à 800 */
+  --weight-regular:  400;
+  --weight-medium:   500;
+  --weight-semibold: 600;
+  --weight-bold:     700;
+
+  /* ----------------------------------------------------------
+     3. ESPACEMENT (système 4pt)
+     ---------------------------------------------------------- */
+  --space-0:   0;
+  --space-1:   2px;
+  --space-2:   4px;
+  --space-3:   8px;
+  --space-4:   12px;
+  --space-5:   16px;
+  --space-6:   20px;
+  --space-7:   24px;
+  --space-8:   32px;
+  --space-9:   40px;
+  --space-10:  48px;
+  --space-11:  64px;
+  --space-12:  80px;
+  --space-13:  96px;
+  --space-14:  128px;
+
+  /* ----------------------------------------------------------
+     4. RAYONS
+     ---------------------------------------------------------- */
+  --radius-none: 0;
+  --radius-xs:   4px;   /* tags, mini chips */
+  --radius-sm:   6px;   /* boutons, inputs */
+  --radius-md:   10px;  /* cartes secondaires */
+  --radius-lg:   14px;  /* cartes principales */
+  --radius-xl:   20px;  /* hero cards, modales */
+  --radius-2xl:  28px;
+  --radius-full: 999px;
+
+  /* ----------------------------------------------------------
+     5. ÉLÉVATIONS / OMBRES
+     plus douces et moins génériques que par défaut
+     ---------------------------------------------------------- */
+  --shadow-none:    0 0 #0000;
+  --shadow-xs:      0 1px 2px rgba(15, 14, 10, 0.04);
+  --shadow-sm:      0 2px 4px rgba(15, 14, 10, 0.05), 0 1px 2px rgba(15, 14, 10, 0.04);
+  --shadow-md:      0 6px 14px -4px rgba(15, 14, 10, 0.08), 0 2px 4px rgba(15, 14, 10, 0.04);
+  --shadow-lg:      0 14px 28px -10px rgba(15, 14, 10, 0.12), 0 4px 10px -2px rgba(15, 14, 10, 0.04);
+  --shadow-xl:      0 24px 48px -16px rgba(15, 14, 10, 0.18), 0 8px 16px -4px rgba(15, 14, 10, 0.05);
+  --shadow-focus:   0 0 0 3px rgba(91, 63, 168, 0.22);
+  --shadow-focus-error: 0 0 0 3px rgba(239, 68, 68, 0.20);
+  --shadow-inset:   inset 0 1px 2px rgba(15, 14, 10, 0.06);
+
+  /* ----------------------------------------------------------
+     6. MOTION
+     ---------------------------------------------------------- */
+  --duration-instant: 80ms;
+  --duration-fast:    150ms;
+  --duration-normal:  220ms;
+  --duration-slow:    320ms;
+  --duration-slower:  500ms;
+
+  /* Easings — éviter le linear */
+  --ease-out:    cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  /* ----------------------------------------------------------
+     7. Z-INDEX
+     ---------------------------------------------------------- */
+  --z-base:      0;
+  --z-raised:    10;
+  --z-sticky:    100;
+  --z-overlay:   500;
+  --z-modal:     1000;
+  --z-toast:     1500;
+  --z-tooltip:   2000;
+
+  /* ----------------------------------------------------------
+     8. BREAKPOINTS (réutilisation JS / @media manuels)
+     ---------------------------------------------------------- */
+  --bp-sm: 480px;
+  --bp-md: 768px;
+  --bp-lg: 1024px;
+  --bp-xl: 1280px;
+  --bp-2xl: 1440px;
+
+  /* ----------------------------------------------------------
+     9. LAYOUT
+     ---------------------------------------------------------- */
+  --container-narrow: 720px;
+  --container-base:   960px;
+  --container-wide:   1200px;
+  --container-full:   1440px;
+
+  --sidebar-width: 264px;
+  --topbar-height: 64px;
+
+  /* Touch target — minimum mobile */
+  --touch-min: 44px;
+}
+
+/* ============================================================
+   ALIASES DE COMPATIBILITÉ
+   Faciliter la migration depuis l'ancien système ln-*.
+   À retirer progressivement au cours du chantier.
+   ============================================================ */
+:root {
+  --ln-blue-50:  var(--ink-50);
+  --ln-blue-100: var(--ink-100);
+  --ln-blue-200: var(--ink-200);
+  --ln-blue-600: var(--ink-600);
+  --ln-blue-700: var(--ink-700);
+  --ln-blue-800: var(--ink-800);
+  --ln-blue-900: var(--ink-900);
+  --ln-gray-50:  var(--sand-50);
+  --ln-gray-100: var(--sand-100);
+  --ln-gray-200: var(--sand-200);
+  --ln-gray-300: var(--sand-300);
+  --ln-gray-400: var(--sand-400);
+  --ln-gray-500: var(--sand-500);
+  --ln-gray-600: var(--sand-600);
+  --ln-gray-700: var(--sand-700);
+  --ln-gray-900: var(--sand-900);
+  --ln-success: var(--success-700);
+  --ln-warning: var(--warning-700);
+  --ln-error: var(--error-700);
+
+  /* ----------------------------------------------------------
+     RÔLES (front management) — ADR-005 : source unique
+     Les fronts ne codent plus les couleurs de rôle en dur.
+     ---------------------------------------------------------- */
+  --role-admin:         #5B8DEF;   /* Administratif */
+  --role-admin-strong:  #2A5BB8;   /* texte / acteur */
+  --role-admin-soft:    #EAF1FD;   /* fond avatar / tint */
+
+  --role-resp:          var(--accent-500);   /* Responsable */
+  --role-resp-strong:   var(--accent-700);
+  --role-resp-soft:     #FBEBD0;
+
+  --role-direction:        #16A34A;   /* Direction */
+  --role-direction-strong: var(--success-700);
+  --role-direction-soft:   #D9F2E0;
+}
