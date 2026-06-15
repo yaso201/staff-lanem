@@ -13,11 +13,18 @@
     admin: '/espace-administratif',
     resp: '/cockpit-responsable',
     dir: '/tableau-direction',
+    sm: '/personnel',
   };
   const ROLE_LABEL = {
     admin: "Agent d'admission",
     resp: 'Responsable admission',
     dir: 'Direction',
+    sm: 'Super-admin (SM)',
+  };
+  // SM = super-admin de domaine : superset d'AFFICHAGE (voit toutes les sections).
+  const VISIBLE_CODES = {
+    admin: ['admin'], resp: ['resp'], dir: ['dir'],
+    sm: ['admin', 'resp', 'dir', 'sm'],
   };
 
   function initials(name) {
@@ -35,9 +42,11 @@
     if (rl) rl.textContent = ROLE_LABEL[role] || role;
     if (av) av.textContent = initials(me.full_name || me.user);
 
-    // Nav + contenu : gating d'AFFICHAGE par rôle (UX — le serveur refuse de toute façon)
+    // Nav + contenu : gating d'AFFICHAGE par rôle (UX — le serveur refuse de toute façon).
+    // SM voit le superset (admin+resp+dir+sm) ; les autres ne voient que leur code.
+    const visible = VISIBLE_CODES[role] || [role];
     document.querySelectorAll('[data-roles]').forEach(el => {
-      el.hidden = !el.getAttribute('data-roles').split(/\s+/).includes(role);
+      el.hidden = !el.getAttribute('data-roles').split(/\s+/).some(r => visible.includes(r));
     });
     document.querySelectorAll('.nav a[data-home]').forEach(a => a.setAttribute('href', ROLE_HOME[role]));
 
@@ -56,12 +65,25 @@
     window.EmelaShell.me = me;
     applyRole(role, me);
 
-    // Déconnexion : la carte utilisateur devient le bouton logout
+    // Déconnexion : la carte utilisateur reste cliquable…
     const userCard = document.querySelector('.app-user');
     if (userCard) {
       userCard.style.cursor = 'pointer';
       userCard.title = 'Se déconnecter';
       userCard.addEventListener('click', () => window.EmelaAPI.logout());
+      // …+ un BOUTON VISIBLE « Déconnexion » (la carte seule n'était pas découvrable).
+      if (!document.querySelector('.app-logout')) {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'app-logout';
+        btn.textContent = 'Déconnexion';
+        btn.title = 'Se déconnecter';
+        btn.style.cssText = 'margin-left:14px;padding:7px 14px;border:1px solid var(--border-default,#d9d4c8);'
+          + 'border-radius:8px;background:var(--surface-paper,#fff);color:var(--text-primary,#1f124a);'
+          + 'cursor:pointer;font-size:13px;font-weight:600;white-space:nowrap;';
+        btn.addEventListener('click', (e) => { e.stopPropagation(); window.EmelaAPI.logout(); });
+        userCard.parentNode.insertBefore(btn, userCard.nextSibling);
+      }
     }
   }
 

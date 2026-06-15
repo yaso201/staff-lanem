@@ -96,12 +96,71 @@
       S.removeItem('emela_csrf'); S.removeItem('emela_user');
       window.location.href = '/connexion';
     },
-    /* Rôle UX (admin/resp/dir) depuis les rôles SERVEUR — priorité dir > resp > admin */
+    /* Rôle UX (sm/admin/resp/dir) depuis les rôles SERVEUR — priorité sm > dir > resp > admin.
+       SM = super-admin de domaine : voit toutes les sections (superset géré dans shell.js). */
     uxRole(roles) {
+      if ((roles || []).includes('Admission SM')) return 'sm';
       if ((roles || []).includes('Admission Direction')) return 'dir';
       if ((roles || []).includes('Admission Responsable')) return 'resp';
       return 'admin';
     },
+
+    /* ---- LOT A (SM) : comptes & identité staff (POST gardés serveur Admission SM) ---- */
+    listStaff() { return request('/api/method/admission.api.admin_staff.list_staff'); },
+    createStaff(fullName, email, role) {
+      return request('/api/method/admission.api.admin_staff.create_staff',
+        { method: 'POST', body: { full_name: fullName, email, role } });
+    },
+    setStaffRole(email, role) {
+      return request('/api/method/admission.api.admin_staff.set_staff_role',
+        { method: 'POST', body: { email, role } });
+    },
+    resetStaffPassword(email, motif) {
+      return request('/api/method/admission.api.admin_staff.reset_staff_password',
+        { method: 'POST', body: { email, motif } });
+    },
+    setStaffEnabled(email, enabled, motif) {
+      return request('/api/method/admission.api.admin_staff.set_staff_enabled',
+        { method: 'POST', body: { email, enabled: enabled ? 1 : 0, motif: motif || null } });
+    },
+
+    /* ---- LOT B (SM) : support candidat (POST gardés serveur Admission SM) ---- */
+    clearCandidateThrottle(dossierId, motif) {
+      return request('/api/method/admission.api.admin_candidate.clear_candidate_throttle',
+        { method: 'POST', body: { dossier_id: dossierId, motif } });
+    },
+    reissueCandidateAccess(dossierId, motif) {
+      return request('/api/method/admission.api.admin_candidate.reissue_candidate_access',
+        { method: 'POST', body: { dossier_id: dossierId, motif } });
+    },
+    rectifyCandidatePii(dossierId, fields, motif) {
+      return request('/api/method/admission.api.admin_candidate.rectify_candidate_pii',
+        { method: 'POST', body: { dossier_id: dossierId, fields, motif } });
+    },
+
+    /* ---- LOT E (SM) : recovery exploitation ---- */
+    getOpsHealth() { return request('/api/method/admission.api.admin_ops.get_ops_health'); },
+    redriveUfNow() { return request('/api/method/admission.api.admin_ops.redrive_uf_now', { method: 'POST', body: {} }); },
+    redriveBridgeNow() { return request('/api/method/admission.api.admin_ops.redrive_bridge_now', { method: 'POST', body: {} }); },
+    expirePendingNow(hours) { return request('/api/method/admission.api.admin_ops.expire_pending_now', { method: 'POST', body: { older_than_hours: hours || 48 } }); },
+
+    /* ---- LOT G (SM) : données & conformité ---- */
+    adminAnonymize(dossierId, motif) { return request('/api/method/admission.api.admin_data.admin_anonymize', { method: 'POST', body: { dossier_id: dossierId, motif } }); },
+    runRetentionNow() { return request('/api/method/admission.api.admin_data.run_retention_now', { method: 'POST', body: {} }); },
+    getAuditLog(limit) { return request('/api/method/admission.api.admin_data.get_audit_log', { params: { limit: limit || 100 } }); },
+
+    /* ---- LOT C (SM) : réglages non-secrets & diagnostic (jamais de secret) ---- */
+    getConfigHealth() { return request('/api/method/admission.api.admin_config.get_config_health'); },
+    getAdminSettings() { return request('/api/method/admission.api.admin_config.get_settings'); },
+    updateAdminSettings(cloisonnement, retention) {
+      return request('/api/method/admission.api.admin_config.update_settings',
+        { method: 'POST', body: { cloisonnement: cloisonnement || null, retention: retention || null } });
+    },
+
+    /* ---- LOT D (SM) : référentiel en mode dégradé (campus = source de vérité) ---- */
+    getDegradedStatus() { return request('/api/method/admission.api.admin_referentiel.get_degraded_status'); },
+    setDegradedMode(on, motif) { return request('/api/method/admission.api.admin_referentiel.set_degraded_mode', { method: 'POST', body: { on: on ? 1 : 0, motif: motif || null } }); },
+    upsertManualProgramme(programme) { return request('/api/method/admission.api.admin_referentiel.upsert_manual_programme', { method: 'POST', body: { programme } }); },
 
     /* ---- lectures (get_list → DocPerms + cloisonnement DEC-262) ---- */
     listDossiers(params) { return staffCall('list_dossiers', { params: params || {} }); },

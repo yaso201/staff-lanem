@@ -299,6 +299,21 @@ import Layout from '../layouts/Layout.astro';
         </div>
         <div class="sec-body"><div class="timeline" id="timeline"></div></div>
       </section>
+
+      <section class="sec" id="sec-sm" data-roles="sm" hidden>
+        <div class="sec-head">
+          <div class="h"><span class="hc"><svg class="ico"><use href="#i-shield"/></svg></span><span class="sec-title">Administration (super-admin)</span></div>
+          <span class="em-badge em-badge--neutral em-badge--sm">SM</span>
+        </div>
+        <div class="sec-body">
+          <p class="t-muted" style="margin-bottom:var(--space-4)">Gestes de support — tracés (motif obligatoire). Le lien de reprise est envoyé au candidat, jamais affiché ici.</p>
+          <div style="display:flex;gap:var(--space-3);flex-wrap:wrap">
+            <button type="button" class="em-btn em-btn--secondary em-btn--sm" id="sm-throttle">Débloquer (rate-limit)</button>
+            <button type="button" class="em-btn em-btn--secondary em-btn--sm" id="sm-reissue">Réémettre l'accès…</button>
+            <button type="button" class="em-btn em-btn--secondary em-btn--sm" id="sm-rectify">Rectifier l'identité…</button>
+          </div>
+        </div>
+      </section>
     </div>
 
     <aside class="rail">
@@ -636,6 +651,46 @@ import Layout from '../layouts/Layout.astro';
       body.innerHTML = '<p class="act-lead" style="margin:0">Aucune action pour votre rôle dans l\'état actuel ('+esc(S)+').</p>';
     }
   }
+
+  /* LOT B (SM) — encart support candidat. Le SERVEUR garde (Admission SM) ; ces boutons
+     ne sont visibles que pour le SM (data-roles="sm"). Reissue envoie le lien AU CANDIDAT. */
+  function bindSmSupport(){
+    const t = $('sm-throttle'), r = $('sm-reissue'), x = $('sm-rectify');
+    if(t) t.addEventListener('click', () => UI.emModal({
+      title: 'Débloquer le candidat (rate-limit)',
+      lead: "Purge les compteurs de limitation (OTP/lien) de ce dossier.",
+      fields: [{ name:'motif', label:'Motif', type:'text', required:true }],
+      submitLabel: 'Débloquer',
+      onSubmit: async v => { await API.clearCandidateThrottle(ID, v.motif); UI.emToast('Compteurs purgés.','success'); },
+    }));
+    if(r) r.addEventListener('click', () => UI.emModal({
+      title: "Réémettre l'accès",
+      lead: "Génère un nouveau lien de reprise envoyé AU CANDIDAT par e-mail (l'ancien lien meurt ; OTP ré-armé). Le lien n'est jamais affiché ici.",
+      fields: [{ name:'motif', label:'Motif', type:'text', required:true }],
+      submitLabel: 'Réémettre',
+      onSubmit: async v => { await API.reissueCandidateAccess(ID, v.motif); UI.emToast('Nouveau lien envoyé au candidat.','success'); },
+    }));
+    if(x) x.addEventListener('click', () => UI.emModal({
+      title: "Rectifier l'identité",
+      lead: "Rectification sur demande (RGPD). Laisser vide un champ pour ne pas le modifier.",
+      fields: [
+        { name:'first_name', label:'Prénom', type:'text', value: (D&&D.identite&&D.identite.prenom)||'' },
+        { name:'last_name', label:'Nom', type:'text', value: (D&&D.identite&&D.identite.nom)||'' },
+        { name:'email', label:'E-mail', type:'text', value: (D&&D.identite&&D.identite.email)||'' },
+        { name:'phone', label:'Téléphone', type:'text', value: (D&&D.identite&&D.identite.tel)||'' },
+        { name:'motif', label:'Motif', type:'text', required:true },
+      ],
+      submitLabel: 'Rectifier',
+      onSubmit: async v => {
+        const fields = {};
+        ['first_name','last_name','email','phone'].forEach(k => { if(v[k]!==undefined && v[k]!=='') fields[k]=v[k]; });
+        if(!Object.keys(fields).length) throw { code:'NOOP', message:'Aucun champ à rectifier.' };
+        await API.rectifyCandidatePii(ID, fields, v.motif);
+        UI.emToast('Identité rectifiée.','success'); refresh();
+      },
+    }));
+  }
+  bindSmSupport();
 
   window.onEmelaRole = function(role){ ROLE = role; if(D) render(); };
   if(!ID){ document.getElementById('dh-name').textContent = 'Dossier non spécifié'; return; }
