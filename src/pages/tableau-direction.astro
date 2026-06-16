@@ -35,7 +35,7 @@ import Layout from '../layouts/Layout.astro';
   .fstage { flex: 1; display: flex; flex-direction: column; gap: var(--space-4); }
   .fbar-wrap { display: flex; align-items: flex-end; height: 132px; }
   .fbar { width: 100%; border-radius: var(--radius-sm) var(--radius-sm) 0 0; background: linear-gradient(180deg, var(--ink-700), var(--ink-900)); display: flex; align-items: flex-start; justify-content: center; padding-top: var(--space-3); position: relative; }
-  .fbar .fcount { font-family: var(--font-display); font-size: var(--text-lg); font-weight: 700; color: #fff; font-variant-numeric: tabular-nums; }
+  .fbar .fcount { font-family: var(--font-display); font-size: var(--text-lg); font-weight: 700; color: #fff; font-variant-numeric: tabular-nums; text-shadow: 0 1px 2px rgba(0,0,0,0.5); }
   .fstage.s2 .fbar { background: linear-gradient(180deg, var(--ink-600), var(--ink-800)); }
   .fstage.s3 .fbar { background: linear-gradient(180deg, var(--accent-500), var(--accent-700)); }
   .fstage.s4 .fbar { background: linear-gradient(180deg, var(--success-500), var(--success-700)); }
@@ -134,13 +134,13 @@ import Layout from '../layouts/Layout.astro';
     <div class="card-head">
       <div><div class="card-title">Entonnoir d'admission</div><div class="card-sub">Dossiers par étape (états courants)</div></div>
     </div>
-    <div class="card-body"><div class="funnel" id="funnel"></div></div>
+    <div class="card-body"><div class="funnel" id="funnel" role="list" aria-label="Entonnoir d'admission, du dépôt à l'inscription"></div></div>
   </div>
 
   <div class="grid2">
     <div class="card" style="margin-bottom:0">
       <div class="card-head"><div><div class="card-title">Répartition par filière</div><div class="card-sub">Part des dossiers</div></div></div>
-      <div class="card-body"><div class="bar-row" id="filieres"></div></div>
+      <div class="card-body"><div class="bar-row" id="filieres" role="list" aria-label="Répartition des dossiers par filière"></div></div>
     </div>
     <div class="card" style="margin-bottom:0">
       <div class="card-head"><div><div class="card-title">Sessions</div><div class="card-sub">Inscrits par session</div></div></div>
@@ -182,15 +182,15 @@ import Layout from '../layouts/Layout.astro';
     const steps = [['SOU','Soumis'],['ETU','En étude'],['ADM','Admis'],['ACC','Accepté'],['INS','Inscrit']];
     const max = Math.max(...steps.map(s=>n(s[0])), 1);
     document.getElementById('funnel').innerHTML = steps.map(([c,l],i)=>
-      '<div class="fstage s'+(i+1)+'"><div class="fbar-wrap"><div class="fbar" style="height:'+Math.max(Math.round(100*n(c)/max),6)+'%"><span class="fcount">'+n(c)+'</span></div></div>'+
-      '<div class="fmeta"><div class="flab">'+l+'</div><div class="fcode">'+c+'</div></div></div>'
-    ).join('<div class="fdrop"><span>→</span></div>');
+      '<div class="fstage s'+(i+1)+'" role="listitem" aria-label="'+esc(l)+' : '+n(c)+' dossier(s)"><div class="fbar-wrap" aria-hidden="true"><div class="fbar" style="height:'+Math.max(Math.round(100*n(c)/max),6)+'%"><span class="fcount">'+n(c)+'</span></div></div>'+
+      '<div class="fmeta" aria-hidden="true"><div class="flab">'+l+'</div><div class="fcode">'+c+'</div></div></div>'
+    ).join('<div class="fdrop" aria-hidden="true"><span>→</span></div>');
 
     const prog = S.par_programme || {};
     const ptot = Object.values(prog).reduce((a,b)=>a+b,0) || 1;
     document.getElementById('filieres').innerHTML = Object.entries(prog).map(([code,count])=>{
       const pct = Math.round(100*count/ptot);
-      return '<div class="bar"><div class="bar-label">'+esc(code||'?')+'</div><div class="bar-track"><div class="bar-fill" style="width:'+pct+'%"></div></div><div class="bar-val">'+pct+' % ('+count+')</div></div>';
+      return '<div class="bar" role="listitem" aria-label="'+esc(code||'inconnu')+' : '+pct+' %, '+count+' dossier(s)"><div class="bar-label" aria-hidden="true">'+esc(code||'?')+'</div><div class="bar-track" aria-hidden="true"><div class="bar-fill" style="width:'+pct+'%"></div></div><div class="bar-val" aria-hidden="true">'+pct+' % ('+count+')</div></div>';
     }).join('') || '<p class="t-muted">Aucun dossier.</p>';
 
     document.getElementById('sessions').innerHTML = (S.sessions||[]).map(s=>

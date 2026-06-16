@@ -140,6 +140,7 @@ import Layout from '../layouts/Layout.astro';
       <tbody id="rows"></tbody>
     </table>
   </div>
+  <nav class="em-pagination" id="pager" aria-label="Pagination des dossiers" hidden></nav>
 </main>
 
 <script is:inline>
@@ -203,9 +204,20 @@ import Layout from '../layouts/Layout.astro';
       const btn=document.createElement('button');
       btn.className='preset'+(p.isKey?' is-key':'')+(p.key===activePreset?' is-active':'');
       btn.innerHTML=esc(p.label)+' <span class="cnt">'+n+'</span>';
-      btn.addEventListener('click',()=>{ activePreset=p.key; renderPresets(); renderRows(); });
+      btn.addEventListener('click',()=>{ activePreset=p.key; page=1; renderPresets(); renderRows(); });
       elPresets.appendChild(btn);
     });
+  }
+
+  const PAGE_SIZE=50; let page=1;
+  function renderPager(pages){
+    const pager=document.getElementById('pager');
+    if(pages<=1){ pager.innerHTML=''; pager.hidden=true; return; }
+    pager.hidden=false;
+    let h='<button type="button" class="em-pagination-btn" data-pg="'+(page-1)+'"'+(page<=1?' disabled':'')+' aria-label="Page précédente">‹</button>';
+    for(let i=1;i<=pages;i++) h+='<button type="button" class="em-pagination-btn" data-pg="'+i+'"'+(i===page?' aria-current="page"':'')+'>'+i+'</button>';
+    h+='<button type="button" class="em-pagination-btn" data-pg="'+(page+1)+'"'+(page>=pages?' disabled':'')+' aria-label="Page suivante">›</button>';
+    pager.innerHTML=h;
   }
 
   function renderRows(){
@@ -224,9 +236,12 @@ import Layout from '../layouts/Layout.astro';
     elRows.innerHTML='';
     if(!rows.length){
       elRows.innerHTML='<tr class="empty-row"><td colspan="8"><div class="em-empty"><div class="em-empty-icon"><svg class="ico-lg"><use href="#i-folders"/></svg></div><div class="em-empty-title">Aucun dossier</div><div class="em-empty-desc">Aucun dossier ne correspond à cette file de travail et à ces filtres.</div></div></td></tr>';
-      return;
+      renderPager(0); return;
     }
-    rows.forEach(d=>{
+    const pages=Math.max(1, Math.ceil(rows.length/PAGE_SIZE));
+    if(page>pages) page=pages;
+    const start=(page-1)*PAGE_SIZE;
+    rows.slice(start, start+PAGE_SIZE).forEach(d=>{
       const s=STATE[d.statut]||{cls:'',label:d.statut};
       const init=(d.nom||'?').split(/\s+/).map(w=>w[0]).slice(0,2).join('').toUpperCase();
       const fr1=d.frais.application||d.frais.competition;
@@ -246,6 +261,7 @@ import Layout from '../layouts/Layout.astro';
       tr.addEventListener('click',()=>{ window.location.href='/dossier?c='+encodeURIComponent(d.dossier_id); });
       elRows.appendChild(tr);
     });
+    renderPager(pages);
   }
 
   async function load(){
@@ -259,7 +275,12 @@ import Layout from '../layouts/Layout.astro';
     if(want && (PRESETS[r]||[]).some(p=>p.key===want)) activePreset=want;
     load().catch(e=>{ if(e.code!=='AUTH') window.EmelaUI.emToast(e.message,'error'); });
   };
-  [q,fProg,fSess,fSort].forEach(el=>el.addEventListener('input',renderRows));
+  [q,fProg,fSess,fSort].forEach(el=>el.addEventListener('input',()=>{ page=1; renderRows(); }));
+  // U-03 : navigation de pagination
+  document.getElementById('pager').addEventListener('click', e=>{
+    const b=e.target.closest('[data-pg]'); if(!b || b.disabled) return;
+    page=parseInt(b.dataset.pg,10); renderRows(); window.scrollTo({top:0,behavior:'smooth'});
+  });
 })();
 </script>
 
