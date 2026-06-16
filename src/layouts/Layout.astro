@@ -1,6 +1,7 @@
 ---
 import '@emela/design-system/index.css';
 import '../styles/shell.css';
+import Icons from '../components/Icons.astro';
 
 interface Props {
   title: string;
@@ -23,6 +24,7 @@ const apiBase = import.meta.env.PUBLIC_API_BASE || 'http://admission-dev.localho
     <script is:inline define:vars={{ apiBase }}>window.EMELA_API_BASE = apiBase;</script>
   </head>
   <body data-role={role} data-page={page} data-shared={shared ? '' : undefined} data-prog={prog}>
+    <Icons />
     <a href="#main-content" class="skip-link">Aller au contenu</a>
     <slot />
     <script is:inline src="/scripts/api.js"></script>
