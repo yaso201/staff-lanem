@@ -4,10 +4,7 @@ import Layout from '../layouts/Layout.astro';
 <Layout title="Réglages & diagnostic — Super-admin" role="sm" page="reglages">
 <style is:global>
   body { background: var(--surface-canvas); }
-  .card { background: var(--surface-paper); border: 1px solid var(--border-default); border-radius: var(--radius-lg); overflow: hidden; }
   .card + .card { margin-top: var(--space-5); }
-  .card-head { display: flex; align-items: center; justify-content: space-between; gap: var(--space-4); padding: var(--space-5) var(--space-7); border-bottom: 1px solid var(--border-subtle); }
-  .card-title { font-size: var(--text-base); font-weight: 600; }
   .diag { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--space-4); padding: var(--space-7); }
   @media (max-width: 640px){ .diag { grid-template-columns: 1fr; } }
   .diag-row { display: flex; align-items: center; justify-content: space-between; gap: var(--space-4); padding: var(--space-4) var(--space-5); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); }
