@@ -128,7 +128,7 @@ import Layout from '../layouts/Layout.astro';
       <div class="queue-sub">Demandes candidat à arbitrer</div>
     </a>
     <a class="queue" href="/liste-dossiers?preset=attente">
-      <div class="queue-top"><span class="queue-ic"><svg class="ico"><use href="#i-clock"/></svg></span><svg class="queue-go"><use href="#i-caretright"/></svg></div>
+      <div class="queue-top"><span class="queue-ic"><svg class="ico"><use href="#i-hourglass"/></svg></span><svg class="queue-go"><use href="#i-caretright"/></svg></div>
       <div class="queue-val" id="q-att">—</div>
       <div class="queue-lab">Liste d'attente</div>
       <div class="queue-sub">Repêchages possibles (ATT)</div>
@@ -163,7 +163,7 @@ import Layout from '../layouts/Layout.astro';
     document.getElementById('greet').textContent = 'Bonjour ' + ((me.full_name||me.user).split(' ')[0]);
     let D;
     try { D = (await API.listDossiers()).dossiers; }
-    catch(e){ if(e.code!=='AUTH') window.EmelaUI.emToast('['+e.code+'] '+e.message,'error'); return; }
+    catch(e){ if(e.code!=='AUTH') window.EmelaUI.emToast(e.message,'error'); return; }
     const etu = D.filter(d=>d.statut==='ETU');
     const notesv = D.filter(d=>d.notes==='saisies');
     const bourse = D.filter(d=>d.bourse==='demandee' && (d.statut==='ETU'||d.statut==='ATT'));

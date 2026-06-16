@@ -100,7 +100,7 @@ import Layout from '../layouts/Layout.astro';
         '</div></td></tr>'
       ).join('') || '<tr><td colspan="5" class="t-muted" style="padding:var(--space-6)">Aucun compte.</td></tr>';
     } catch(e){
-      if(e.code!=='AUTH') UI.emToast('['+e.code+'] '+e.message,'error');
+      if(e.code!=='AUTH') UI.emToast(e.message,'error');
     }
   }
 
@@ -153,7 +153,7 @@ import Layout from '../layouts/Layout.astro';
       });
     } else {
       API.setStaffEnabled(email, true).then(() => { UI.emToast('Compte réactivé.','success'); render(); })
-        .catch(e => { if(e.code!=='AUTH') UI.emToast('['+e.code+'] '+e.message,'error'); });
+        .catch(e => { if(e.code!=='AUTH') UI.emToast(e.message,'error'); });
     }
   }
 

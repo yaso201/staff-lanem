@@ -7,7 +7,7 @@ import Layout from '../layouts/Layout.astro';
   body { background: var(--surface-canvas); }
 
   .tabs { display: flex; gap: var(--space-2); border-bottom: 1px solid var(--border-subtle); margin-bottom: var(--space-7); }
-  .tab { padding: var(--space-4) var(--space-5); font-size: var(--text-sm); font-weight: 500; color: var(--text-secondary); cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px; display: inline-flex; align-items: center; gap: var(--space-3); }
+  .tab { background: transparent; border: none; border-bottom: 2px solid transparent; font-family: inherit; padding: var(--space-4) var(--space-5); font-size: var(--text-sm); font-weight: 500; color: var(--text-secondary); cursor: pointer; margin-bottom: -1px; display: inline-flex; align-items: center; gap: var(--space-3); }
   .tab:hover { color: var(--text-primary); }
   .tab.is-active { color: var(--ink-900); font-weight: 600; border-bottom-color: var(--ink-800); }
   .panel { display: none; }
@@ -94,10 +94,10 @@ import Layout from '../layouts/Layout.astro';
     </div>
   </div>
 
-  <div class="tabs" id="tabs">
-    <div class="tab is-active" data-tab="sessions"><svg class="ico-sm"><use href="#i-cal"/></svg>Sessions</div>
-    <div class="tab" data-tab="frais"><svg class="ico-sm"><use href="#i-coins"/></svg>Grille des frais</div>
-    <div class="tab" data-tab="promos"><svg class="ico-sm"><use href="#i-graduation"/></svg>Promotions &amp; bourses</div>
+  <div class="tabs" id="tabs" role="tablist" aria-label="Sessions, frais et promotions">
+    <button type="button" class="tab is-active" role="tab" aria-selected="true" data-tab="sessions"><svg class="ico-sm"><use href="#i-cal"/></svg>Sessions</button>
+    <button type="button" class="tab" role="tab" aria-selected="false" data-tab="frais"><svg class="ico-sm"><use href="#i-coins"/></svg>Grille des frais</button>
+    <button type="button" class="tab" role="tab" aria-selected="false" data-tab="promos"><svg class="ico-sm"><use href="#i-graduation"/></svg>Promotions &amp; bourses</button>
   </div>
 
   <section class="panel is-active" data-panel="sessions">
@@ -142,10 +142,19 @@ import Layout from '../layouts/Layout.astro';
 (function(){
   const API = window.EmelaAPI, esc = window.EmelaUI.esc;
 
-  document.getElementById('tabs').addEventListener('click', e=>{
-    const t = e.target.closest('.tab'); if(!t) return;
-    document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('is-active', x===t));
+  const tabsEl = document.getElementById('tabs');
+  function selectTab(t){
+    document.querySelectorAll('.tab').forEach(x=>{ const on = x===t; x.classList.toggle('is-active', on); x.setAttribute('aria-selected', on?'true':'false'); });
     document.querySelectorAll('.panel').forEach(p=>p.classList.toggle('is-active', p.dataset.panel===t.dataset.tab));
+  }
+  tabsEl.addEventListener('click', e=>{ const t = e.target.closest('.tab'); if(t) selectTab(t); });
+  // A-01 : navigation aux flèches entre onglets
+  tabsEl.addEventListener('keydown', e=>{
+    if(e.key!=='ArrowRight' && e.key!=='ArrowLeft') return;
+    const tabs=[...tabsEl.querySelectorAll('.tab')];
+    const i=tabs.indexOf(document.activeElement); if(i<0) return;
+    const j=e.key==='ArrowRight' ? (i+1)%tabs.length : (i-1+tabs.length)%tabs.length;
+    tabs[j].focus(); selectTab(tabs[j]); e.preventDefault();
   });
 
   window.onEmelaRole = async function(role){
@@ -202,7 +211,7 @@ import Layout from '../layouts/Layout.astro';
         '<tr><td class="code-cell">'+esc(b.mirror_key)+'</td><td>'+esc(b.scholarship_name)+'</td><td>'+esc(b.category||'')+'</td><td>'+(Math.round(b.rate*1000)/10)+' %</td><td>'+esc(b.exclusivity_group||'—')+'</td></tr>'
       ).join('') || '<tr><td colspan="5" class="t-muted">Aucune bourse répliquée.</td></tr>';
     } catch(e){
-      if(e.code!=='AUTH') window.EmelaUI.emToast('['+e.code+'] '+e.message,'error');
+      if(e.code!=='AUTH') window.EmelaUI.emToast(e.message,'error');
     }
   };
 })();

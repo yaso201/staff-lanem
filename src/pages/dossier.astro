@@ -10,23 +10,6 @@ import Layout from '../layouts/Layout.astro';
   .ico-lg { width: 22px; height: 22px; flex-shrink: 0; }
   [hidden] { display: none !important; }
 
-  /* ---------- Strip démo (méta-contrôle de rôle/programme) ---------- */
-  .demo { background: var(--ink-950); color: #fff; }
-  .demo-inner { max-width: 1240px; margin: 0 auto; padding: var(--space-4) var(--space-9); display: flex; align-items: center; justify-content: space-between; gap: var(--space-6); flex-wrap: wrap; }
-  .demo-left { display: flex; align-items: center; gap: var(--space-4); font-size: var(--text-xs); color: rgba(255,255,255,0.62); }
-  .demo-pill { background: var(--accent-500); color: #fff; padding: 2px 9px; border-radius: 999px; font-size: 10px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; }
-  .demo-controls { display: flex; align-items: center; gap: var(--space-6); flex-wrap: wrap; }
-  .demo-group { display: flex; align-items: center; gap: var(--space-3); }
-  .demo-group > .lbl { font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(255,255,255,0.40); }
-  .seg { display: flex; gap: 2px; padding: 3px; background: rgba(255,255,255,0.08); border-radius: 999px; }
-  .seg button { padding: 6px 13px; font-size: 12px; font-weight: 600; color: rgba(255,255,255,0.66); border-radius: 999px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; transition: color var(--duration-fast) var(--ease-out); }
-  .seg button:hover:not(.is-active) { color: #fff; }
-  .seg button.is-active { background: #fff; color: var(--ink-900); }
-  .seg button .dot { width: 7px; height: 7px; border-radius: 50%; }
-  .seg button[data-role="admin"] .dot { background: var(--role-admin); }
-  .seg button[data-role="resp"]  .dot { background: var(--accent-500); }
-  .seg button[data-role="dir"]   .dot { background: var(--role-direction); }
-
   /* ---------- Topbar produit ---------- */
   .top { background: var(--surface-paper); border-bottom: 1px solid var(--border-default); position: sticky; top: 0; z-index: var(--z-sticky); }
   .top-inner { max-width: 1240px; margin: 0 auto; padding: var(--space-4) var(--space-9); display: flex; align-items: center; justify-content: space-between; gap: var(--space-5); }
@@ -39,7 +22,7 @@ import Layout from '../layouts/Layout.astro';
   .you .av { width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 12px; }
 
   .wrap { max-width: 1240px; margin: 0 auto; padding: var(--space-6) var(--space-9) var(--space-12); }
-  @media (max-width: 720px){ .top-inner, .demo-inner, .wrap { padding-left: var(--space-5); padding-right: var(--space-5); } }
+  @media (max-width: 720px){ .top-inner, .wrap { padding-left: var(--space-5); padding-right: var(--space-5); } }
 
   .crumb { display: flex; align-items: center; gap: var(--space-3); font-size: var(--text-sm); color: var(--text-tertiary); margin-bottom: var(--space-5); }
   .crumb a { color: var(--text-tertiary); }
@@ -343,7 +326,7 @@ import Layout from '../layouts/Layout.astro';
     BRO:{l:'Brouillon',b:'neutral'}, SOP:{l:'Soumis (prov.)',b:'warning'}, SOU:{l:'Soumis',b:'info'},
     INC:{l:'Incomplet',b:'warning'}, ETU:{l:'En étude',b:'info'}, ATT:{l:"Liste d'attente",b:'warning'},
     ADM:{l:'Admis',b:'success'}, ACO:{l:'Admis sous réserve',b:'accent'}, ACC:{l:'Accepté',b:'success'},
-    INS:{l:'Inscrit',b:'success'}, REF:{l:'Refusé',b:'danger'}, DES:{l:'Désisté',b:'neutral'}
+    INS:{l:'Inscrit',b:'success'}, REF:{l:'Refusé',b:'error'}, DES:{l:'Désisté',b:'neutral'}
   };
   const PIECE_LABELS = { missing:'Manquante', uploaded:'Déposée', verified:'Déposée', rejected:'Rejetée' };
   const FEE_LABELS = { application:'Frais de candidature', competition:'Frais de concours', enrollment:"Frais d'inscription (frais 2)", annual:'Scolarité annuelle' };
@@ -564,7 +547,7 @@ import Layout from '../layouts/Layout.astro';
           fields:[{name:'notes',label:'Notes',type:'rows',required:true,value:(D.notes&&D.notes.valeurs)||{}}], submitLabel:'Enregistrer',
           onSubmit: async v=>{ await API.saisirNotes(D.dossier_id, v.notes); UI.emToast('Notes enregistrées (à valider).','success'); await refresh(); } });
       },'pencil'));
-      if(S==='ACO' && !D.bac_verified) body.appendChild(act('Vérifier le diplôme du Bac','primary',async()=>{ await API.verifyBac(D.dossier_id).catch(e=>{UI.emToast('['+e.code+'] '+e.message,'error');throw e;}); UI.emToast('Diplôme vérifié — la levée appartient à la Direction.','success'); await refresh(); },'graduation'));
+      if(S==='ACO' && !D.bac_verified) body.appendChild(act('Vérifier le diplôme du Bac','primary',async()=>{ await API.verifyBac(D.dossier_id).catch(e=>{UI.emToast(e.message,'error');throw e;}); UI.emToast('Diplôme vérifié — la levée appartient à la Direction.','success'); await refresh(); },'graduation'));
       /* W1 (B0.1) : désistement — motif obligatoire, candidat notifié (ton neutre). */
       if(['BRO','SOP','SOU','ETU','ATT','ADM','ACO','ACC'].includes(S))
         body.appendChild(act('Désister le dossier…','secondary',()=>motifModal('Désister le dossier',
@@ -594,7 +577,7 @@ import Layout from '../layouts/Layout.astro';
         },'medal'));
       if(S==='ETU'||S==='ATT'){
         const row = document.createElement('div'); row.className='act-decide';
-        const adm = act('Admettre','primary',async()=>{ try{ await API.markAdmissible(D.dossier_id); UI.emToast('Dossier admis (ADM) — validation Direction attendue.','success'); await refresh(); }catch(e){ UI.emToast('['+e.code+'] '+e.message,'error'); } },'gavel');
+        const adm = act('Admettre','primary',async()=>{ try{ await API.markAdmissible(D.dossier_id); UI.emToast('Dossier admis (ADM) — validation Direction attendue.','success'); await refresh(); }catch(e){ UI.emToast(e.message,'error'); } },'gavel');
         row.appendChild(adm);
         if(S==='ETU'){
           row.appendChild(act('Liste d\'attente…','secondary',()=>{
@@ -604,7 +587,7 @@ import Layout from '../layouts/Layout.astro';
           row.appendChild(act('Refuser…','secondary',()=>motifModal('Refuser le dossier','Le motif est obligatoire et notifié au candidat.','Refuser',m=>API.refuse(D.dossier_id,m)),'x'));
         }
         body.appendChild(row);
-        if(S==='ETU' && D.conditionnel) body.appendChild(act('Admission conditionnelle (bac en attente)','accent',async()=>{ try{ await API.conditionalAdmission(D.dossier_id); UI.emToast('Admission conditionnelle prononcée (ACO).','success'); await refresh(); }catch(e){ UI.emToast('['+e.code+'] '+e.message,'error'); } },'hourglass'));
+        if(S==='ETU' && D.conditionnel) body.appendChild(act('Admission conditionnelle (bac en attente)','accent',async()=>{ try{ await API.conditionalAdmission(D.dossier_id); UI.emToast('Admission conditionnelle prononcée (ACO).','success'); await refresh(); }catch(e){ UI.emToast(e.message,'error'); } },'hourglass'));
       }
     }
 
@@ -694,7 +677,7 @@ import Layout from '../layouts/Layout.astro';
 
   window.onEmelaRole = function(role){ ROLE = role; if(D) render(); };
   if(!ID){ document.getElementById('dh-name').textContent = 'Dossier non spécifié'; return; }
-  refresh().catch(e=>{ if(e.code!=='AUTH'){ $('dh-name').textContent='Erreur'; UI.emToast('['+e.code+'] '+e.message,'error'); } });
+  refresh().catch(e=>{ if(e.code!=='AUTH'){ $('dh-name').textContent='Erreur'; UI.emToast(e.message,'error'); } });
 })();
 </script>
 

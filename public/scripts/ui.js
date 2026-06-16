@@ -21,11 +21,12 @@
       toastBox = el('div', { style: 'position:fixed;bottom:20px;right:20px;z-index:9999;display:flex;flex-direction:column;gap:8px;max-width:420px' });
       document.body.appendChild(toastBox);
     }
-    const colors = { success: 'var(--success-700, #15803d)', error: 'var(--danger-700, #b91c1c)', info: 'var(--ink-800, #1f2937)' };
+    const colors = { success: 'var(--success-700, #15803d)', error: 'var(--error-700, #b91c1c)', info: 'var(--ink-800, #1f2937)' };
     const t = el('div', {
       style: 'background:' + (colors[type] || colors.info) + ';color:#fff;padding:12px 16px;border-radius:10px;' +
         'font-size:13.5px;line-height:1.45;box-shadow:0 8px 24px rgba(0,0,0,.18);',
-      role: 'status',
+      // A-05 : erreur = assertif (alert), succès/info = poli (status)
+      role: type === 'error' ? 'alert' : 'status',
     });
     t.textContent = message;
     toastBox.appendChild(t);
@@ -36,13 +37,16 @@
      emModal({ title, lead, fields:[{name,label,type,required,options,placeholder,value,help}],
                submitLabel, danger, onSubmit(values) → Promise })
      onSubmit qui rejette → l'erreur s'affiche DANS la modale (message serveur). */
+  let modalSeq = 0;
   function emModal(cfg) {
+    const prevFocus = document.activeElement;            // A-03 : à restituer à la fermeture
+    const titleId = 'em-modal-title-' + (++modalSeq);
     const overlay = el('div', { style: 'position:fixed;inset:0;background:rgba(15,12,35,.45);z-index:9000;display:flex;align-items:center;justify-content:center;padding:20px' });
-    const box = el('div', { style: 'background:var(--surface-paper,#fff);border-radius:14px;max-width:540px;width:100%;max-height:90vh;overflow:auto;padding:26px 26px 22px;box-shadow:0 24px 64px rgba(0,0,0,.25)' });
+    const box = el('div', { role: 'dialog', 'aria-modal': 'true', 'aria-labelledby': titleId, style: 'background:var(--surface-paper,#fff);border-radius:14px;max-width:540px;width:100%;max-height:90vh;overflow:auto;padding:26px 26px 22px;box-shadow:0 24px 64px rgba(0,0,0,.25)' });
     overlay.appendChild(box);
 
-    box.appendChild(el('h3', { style: 'font-family:var(--font-display);font-size:19px;font-weight:700;margin:0 0 6px' }, cfg.title || ''));
-    if (cfg.lead) box.appendChild(el('p', { style: 'font-size:13.5px;color:var(--text-secondary);margin:0 0 16px;line-height:1.5' }, cfg.lead));
+    box.appendChild(el('h3', { id: titleId, style: 'font-family:var(--font-display);font-size:19px;font-weight:700;margin:0 0 6px' }, cfg.title || ''));
+    if (cfg.lead) box.appendChild(el('p', { style: 'font-size:13.5px;color:var(--text-secondary);margin:0 0 16px;line-height:1.5;white-space:pre-line' }, cfg.lead));
 
     const form = el('form', { novalidate: '' });
     box.appendChild(form);
@@ -52,7 +56,7 @@
       const wrap = el('div', { style: 'margin-bottom:14px' });
       if (f.type !== 'checkbox-list') {
         wrap.appendChild(el('label', { style: 'display:block;font-size:13px;font-weight:600;margin-bottom:6px' },
-          f.label + (f.required ? ' <span style="color:var(--danger-600,#dc2626)">*</span>' : '')));
+          f.label + (f.required ? ' <span style="color:var(--error-500,#dc2626)">*</span>' : '')));
       }
       let input;
       if (f.type === 'textarea') {
@@ -120,17 +124,33 @@
       form.appendChild(wrap);
     });
 
-    const errBox = el('div', { style: 'display:none;background:var(--danger-50,#fef2f2);color:var(--danger-700,#b91c1c);border-radius:8px;padding:10px 12px;font-size:13px;margin:4px 0 12px;line-height:1.45' });
+    const errBox = el('div', { role: 'alert', 'aria-live': 'assertive', style: 'display:none;background:var(--error-50,#fef2f2);color:var(--error-700,#b91c1c);border-radius:8px;padding:10px 12px;font-size:13px;margin:4px 0 12px;line-height:1.45' });
     form.appendChild(errBox);
 
     const foot = el('div', { style: 'display:flex;gap:10px;justify-content:flex-end;margin-top:6px' });
     const cancel = el('button', { type: 'button', class: 'em-btn em-btn--secondary' }, 'Annuler');
-    const submit = el('button', { type: 'submit', class: 'em-btn ' + (cfg.danger ? 'em-btn--danger' : 'em-btn--primary') }, cfg.submitLabel || 'Confirmer');
+    const submit = el('button', { type: 'submit', class: 'em-btn ' + (cfg.danger ? 'em-btn--destructive' : 'em-btn--primary') }, cfg.submitLabel || 'Confirmer');
     foot.appendChild(cancel); foot.appendChild(submit);
     form.appendChild(foot);
 
-    function close() { overlay.remove(); document.removeEventListener('keydown', onKey); }
-    function onKey(e) { if (e.key === 'Escape') close(); }
+    function close() {
+      overlay.remove();
+      document.removeEventListener('keydown', onKey);
+      // A-03 : rendre le focus au déclencheur
+      if (prevFocus && typeof prevFocus.focus === 'function') prevFocus.focus();
+    }
+    const FOCUSABLE = 'a[href],button:not([disabled]),input:not([disabled]),select:not([disabled]),textarea:not([disabled]),[tabindex]:not([tabindex="-1"])';
+    function onKey(e) {
+      if (e.key === 'Escape') { close(); return; }
+      // A-03 : piège de focus — la tabulation reste dans la modale
+      if (e.key === 'Tab') {
+        const f = [...box.querySelectorAll(FOCUSABLE)].filter(n => n.offsetParent !== null);
+        if (!f.length) return;
+        const first = f[0], last = f[f.length - 1];
+        if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+        else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+      }
+    }
     cancel.addEventListener('click', close);
     overlay.addEventListener('click', e => { if (e.target === overlay) close(); });
     document.addEventListener('keydown', onKey);
@@ -157,8 +177,9 @@
         await cfg.onSubmit(values);
         close();
       } catch (err) {
-        // Message SERVEUR affiché tel quel (403 rôle, 409 état, EXCLUSIVITY_CONFLICT, GATE_FAILED…)
-        errBox.textContent = '[' + (err.code || 'ERREUR') + '] ' + (err.message || 'Action refusée.');
+        // U-01 : message SERVEUR seul (le code technique reste pour les logs, pas l'écran)
+        errBox.textContent = err.message || 'Action refusée.';
+        if (err.code) console.warn('[emModal]', err.code, err.message);
         errBox.style.display = 'block';
         submit.disabled = false; submit.textContent = cfg.submitLabel || 'Confirmer';
       }

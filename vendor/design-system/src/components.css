@@ -566,7 +566,8 @@
   background: var(--surface-paper);
   border: 1px solid var(--border-default);
   border-radius: var(--radius-lg);
-  overflow: hidden;
+  overflow-x: auto;            /* R-01 : défilement horizontal au lieu de clipper sur mobile */
+  -webkit-overflow-scrolling: touch;
 }
 .em-table { width: 100%; border-collapse: collapse; border-spacing: 0; }
 .em-table th,

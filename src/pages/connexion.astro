@@ -69,7 +69,7 @@ import BareLayout from '../layouts/BareLayout.astro';
   <aside class="brandpane">
     <div class="bp-mid">
       <span class="bp-eyebrow">Front management · Admissions</span>
-      <h1 class="bp-h">Un seul outil, adapté à chaque rôle.</h1>
+      <p class="bp-h">Un seul outil, adapté à chaque rôle.</p>
       <p class="bp-p">L'application présente à chacun ce qu'il a le droit de faire — et masque le reste. La séparation des pouvoirs est garantie côté écran comme côté serveur.</p>
     </div>
     <div class="bp-foot">Authentification déléguée à Frappe · accès inter-domaines sécurisé</div>
@@ -78,7 +78,7 @@ import BareLayout from '../layouts/BareLayout.astro';
   <!-- Volet formulaire -->
   <section class="formpane">
     <form class="login" id="login" autocomplete="off">
-      <h2 class="login-h">Connexion</h2>
+      <h1 class="login-h">Connexion</h1>
       <p class="login-sub">Accédez à votre espace de gestion des admissions.</p>
 
       <div class="field">
@@ -92,7 +92,7 @@ import BareLayout from '../layouts/BareLayout.astro';
         <input class="em-input" id="pw" type="password" placeholder="••••••••" autocomplete="current-password" />
       </div>
 
-      <div id="login-err" style="display:none;background:var(--danger-50,#fef2f2);color:var(--danger-700,#b91c1c);border-radius:8px;padding:10px 12px;font-size:13px;margin-bottom:14px;line-height:1.45"></div>
+      <div id="login-err" role="alert" aria-live="assertive" style="display:none;background:var(--error-50,#fef2f2);color:var(--error-700,#b91c1c);border-radius:8px;padding:10px 12px;font-size:13px;margin-bottom:14px;line-height:1.45"></div>
 
       <button type="submit" class="em-btn em-btn--primary em-btn--lg em-btn--block" id="login-btn">Se connecter<svg class="ico"><use href="#i-caretright"/></svg></button>
 
@@ -101,7 +101,7 @@ import BareLayout from '../layouts/BareLayout.astro';
 
     <!-- Étape 2FA : saisie du code reçu par e-mail (comptes à double authentification) -->
     <form class="login" id="otp" autocomplete="off" style="display:none">
-      <h2 class="login-h">Vérification en deux étapes</h2>
+      <h1 class="login-h">Vérification en deux étapes</h1>
       <p class="login-sub" id="otp-sub">Un code de vérification vient d'être envoyé à votre adresse e-mail. Saisissez-le pour terminer la connexion.</p>
 
       <div class="field">
@@ -109,7 +109,7 @@ import BareLayout from '../layouts/BareLayout.astro';
         <input class="em-input" id="otp-code" type="text" inputmode="numeric" autocomplete="one-time-code" placeholder="••••••" maxlength="8" />
       </div>
 
-      <div id="otp-err" style="display:none;background:var(--danger-50,#fef2f2);color:var(--danger-700,#b91c1c);border-radius:8px;padding:10px 12px;font-size:13px;margin-bottom:14px;line-height:1.45"></div>
+      <div id="otp-err" role="alert" aria-live="assertive" style="display:none;background:var(--error-50,#fef2f2);color:var(--error-700,#b91c1c);border-radius:8px;padding:10px 12px;font-size:13px;margin-bottom:14px;line-height:1.45"></div>
 
       <button type="submit" class="em-btn em-btn--primary em-btn--lg em-btn--block" id="otp-btn">Valider le code<svg class="ico"><use href="#i-caretright"/></svg></button>
 

@@ -90,7 +90,7 @@ import Layout from '../layouts/Layout.astro';
   function $(id){ return document.getElementById(id); }
   let SETTINGS = null;
 
-  function badge(ok){ return '<span class="em-badge em-badge--'+(ok?'success':'danger')+' em-badge--sm"><span class="em-badge-dot"></span>'+(ok?'Présent':'Absent')+'</span>'; }
+  function badge(ok){ return '<span class="em-badge em-badge--'+(ok?'success':'error')+' em-badge--sm"><span class="em-badge-dot"></span>'+(ok?'Présent':'Absent')+'</span>'; }
 
   async function loadDiag(){
     try {
@@ -109,9 +109,9 @@ import Layout from '../layouts/Layout.astro';
       if(f.developer_mode) warn.push('developer_mode');
       if(f.expose_dev_otp) warn.push('expose_dev_otp');
       if(f.kkiapay_mock) warn.push('kkiapay_mock');
-      if(warn.length) html += '<div class="diag-row" style="grid-column:1/-1;border-color:var(--accent-300)"><span class="diag-lbl">Drapeaux DEV actifs</span><span class="em-badge em-badge--warning em-badge--sm">'+esc(warn.join(', '))+'</span></div>';
+      if(warn.length) html += '<div class="diag-row" style="grid-column:1/-1;border-color:var(--accent-200)"><span class="diag-lbl">Drapeaux DEV actifs</span><span class="em-badge em-badge--warning em-badge--sm">'+esc(warn.join(', '))+'</span></div>';
       $('diag').innerHTML = html;
-    } catch(e){ if(e.code!=='AUTH') UI.emToast('['+e.code+'] '+e.message,'error'); }
+    } catch(e){ if(e.code!=='AUTH') UI.emToast(e.message,'error'); }
   }
 
   async function loadSettings(){
@@ -125,7 +125,7 @@ import Layout from '../layouts/Layout.astro';
       const r = SETTINGS.retention;
       $('reten').innerHTML = Object.entries(r).map(([k,v]) =>
         '<div class="kv-row"><span>'+esc(k)+'</span><b>'+esc(v)+'</b></div>').join('');
-    } catch(e){ if(e.code!=='AUTH') UI.emToast('['+e.code+'] '+e.message,'error'); }
+    } catch(e){ if(e.code!=='AUTH') UI.emToast(e.message,'error'); }
   }
 
   let DEG = null;
@@ -144,7 +144,7 @@ import Layout from '../layouts/Layout.astro';
       tg.textContent = on ? 'Désactiver le mode dégradé' : 'Activer le mode dégradé…';
       tg.className = 'em-btn em-btn--'+(on?'secondary':'primary')+' em-btn--sm';
       $('deg-edit').hidden = !on;
-    } catch(e){ if(e.code!=='AUTH') UI.emToast('['+e.code+'] '+e.message,'error'); }
+    } catch(e){ if(e.code!=='AUTH') UI.emToast(e.message,'error'); }
   }
 
   function bind(){
@@ -153,7 +153,7 @@ import Layout from '../layouts/Layout.astro';
       const on = DEG && DEG.degraded_mode;
       if (on) {
         API.setDegradedMode(false).then(() => { UI.emToast('Mode dégradé désactivé.','success'); loadDegraded(); })
-          .catch(e => { if(e.code!=='AUTH') UI.emToast('['+e.code+'] '+e.message,'error'); });
+          .catch(e => { if(e.code!=='AUTH') UI.emToast(e.message,'error'); });
       } else {
         UI.emModal({
           title: 'Activer le mode dégradé',

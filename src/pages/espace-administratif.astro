@@ -171,7 +171,7 @@ import Layout from '../layouts/Layout.astro';
     document.getElementById('greet').textContent = 'Bonjour ' + ((me.full_name||me.user).split(' ')[0]);
     let D;
     try { D = (await API.listDossiers()).dossiers; }
-    catch(e){ if(e.code!=='AUTH') window.EmelaUI.emToast('['+e.code+'] '+e.message,'error'); return; }
+    catch(e){ if(e.code!=='AUTH') window.EmelaUI.emToast(e.message,'error'); return; }
     const sop = D.filter(d=>d.paiement_a_confirmer);
     const sou = D.filter(d=>d.statut==='SOU');
     const notes = D.filter(d=>d.is_prepa && d.statut==='ETU' && d.notes==='absentes');
