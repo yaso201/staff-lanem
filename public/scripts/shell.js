@@ -65,6 +65,10 @@
     window.EmelaShell.me = me;
     applyRole(role, me);
 
+    // A-04 : cible du lien d'évitement (id + focusable) sur le contenu principal
+    const main = document.querySelector('main');
+    if (main) { if (!main.id) main.id = 'main-content'; main.setAttribute('tabindex', '-1'); }
+
     // Déconnexion : la carte utilisateur reste cliquable…
     const userCard = document.querySelector('.app-user');
     if (userCard) {
@@ -75,12 +79,12 @@
       if (!document.querySelector('.app-logout')) {
         const btn = document.createElement('button');
         btn.type = 'button';
-        btn.className = 'app-logout';
+        // F-05 : variante du design system au lieu de styles inline
+        btn.className = 'app-logout em-btn em-btn--secondary em-btn--sm';
         btn.textContent = 'Déconnexion';
         btn.title = 'Se déconnecter';
-        btn.style.cssText = 'margin-left:14px;padding:7px 14px;border:1px solid var(--border-default,#d9d4c8);'
-          + 'border-radius:8px;background:var(--surface-paper,#fff);color:var(--text-primary,#1f124a);'
-          + 'cursor:pointer;font-size:13px;font-weight:600;white-space:nowrap;';
+        btn.style.marginLeft = 'var(--space-4, 14px)';
+        btn.style.whiteSpace = 'nowrap';
         btn.addEventListener('click', (e) => { e.stopPropagation(); window.EmelaAPI.logout(); });
         userCard.parentNode.insertBefore(btn, userCard.nextSibling);
       }
