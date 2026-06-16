@@ -158,7 +158,7 @@ import Layout from '../layouts/Layout.astro';
     const admis = n('ADM')+n('ACO')+n('ACC')+n('INS');
     document.getElementById('k-sou').textContent = sou;
     document.getElementById('k-sou-m').textContent = total+' dossiers au total';
-    document.getElementById('k-conv').innerHTML = (sou? Math.round(100*n('INS')/sou) : 0)+'<small> %</small>';
+    document.getElementById('k-conv').innerHTML = (sou? Math.round(100*n('INS')/sou) : 0)+'<span class="em-kpi-value-unit"> %</span>';
     document.getElementById('k-conv-m').textContent = n('INS')+' inscrits / '+sou+' soumis';
     document.getElementById('k-adm').textContent = admis;
     document.getElementById('k-adm-m').textContent = n('REF')+' refusés · '+n('ATT')+" en liste d'attente";
