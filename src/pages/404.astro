@@ -1,0 +1,24 @@
+---
+import BareLayout from '../layouts/BareLayout.astro';
+---
+<BareLayout title="Page introuvable — LaNEM">
+<style is:global>
+  body { background: var(--surface-canvas); }
+  .wrap { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: var(--space-9); }
+  .card { width: 100%; max-width: 440px; text-align: center; background: var(--surface-paper); border: 1px solid var(--border-default); border-radius: var(--radius-lg); padding: var(--space-11) var(--space-9); }
+  .logo { display: block; height: 44px; width: auto; margin: 0 auto var(--space-8); }
+  .code { font-family: var(--font-display); font-size: 56px; font-weight: 700; letter-spacing: -0.03em; color: var(--ink-900); line-height: 1; }
+  .h { font-family: var(--font-display); font-size: var(--text-xl); font-weight: 700; margin-top: var(--space-5); }
+  .sub { font-size: var(--text-sm); color: var(--text-secondary); margin-top: var(--space-4); margin-bottom: var(--space-8); line-height: 1.6; }
+  .btn { display: inline-block; height: 46px; line-height: 46px; padding: 0 var(--space-8); border-radius: var(--radius-sm); background: var(--ink-900); color: #fff; font-size: var(--text-sm); font-weight: 700; text-decoration: none; }
+</style>
+<main class="wrap">
+  <div class="card">
+    <img class="logo" src="/lanem-logo.webp" alt="LaNEM" />
+    <div class="code">404</div>
+    <h1 class="h">Page introuvable</h1>
+    <p class="sub">La page demandée n'existe pas ou a été déplacée. Revenez à votre espace de gestion des admissions.</p>
+    <a class="btn" href="/connexion">Retour à la connexion</a>
+  </div>
+</main>
+</BareLayout>
