@@ -12,19 +12,19 @@ import BareLayout from '../layouts/BareLayout.astro';
   @media (max-width: 860px){ .split { grid-template-columns: 1fr; } .brandpane { display: none; } }
 
   /* Volet de marque */
-  .brandpane { background: linear-gradient(rgba(31,18,74,0.68), rgba(31,18,74,0.68)), url('/lanem-login.webp') center/cover no-repeat; color: #fff; padding: var(--space-12) var(--space-11); display: flex; flex-direction: column; justify-content: space-between; position: relative; overflow: hidden; }
+  .brandpane { background: linear-gradient(rgba(20,11,48,0.78), rgba(20,11,48,0.72)), url('/lanem-login.webp') center/cover no-repeat; color: #fff; padding: var(--space-12) var(--space-11); display: flex; flex-direction: column; justify-content: space-between; position: relative; overflow: hidden; }
   .brandpane::after { content: ''; position: absolute; right: -120px; top: -120px; width: 360px; height: 360px; border-radius: 50%; background: radial-gradient(circle, rgba(245,158,11,0.22), transparent 70%); }
   .bp-brand { font-family: var(--font-display); font-size: 26px; font-weight: 700; letter-spacing: -0.02em; position: relative; }
   .bp-brand span { color: var(--accent-500); }
   .bp-mid { position: relative; }
-  .bp-eyebrow { font-size: var(--text-2xs); font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: var(--accent-200); }
+  .bp-eyebrow { font-size: var(--text-sm); font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: #FFFFFF; }
   .bp-h { font-family: var(--font-display); font-size: var(--text-3xl); font-weight: 700; letter-spacing: -0.02em; line-height: 1.12; margin-top: var(--space-5); max-width: 14ch; }
-  .bp-p { font-size: var(--text-md); color: rgba(255,255,255,0.74); margin-top: var(--space-5); max-width: 40ch; line-height: var(--leading-normal); }
+  .bp-p { font-size: var(--text-lg); color: #FFFFFF; margin-top: var(--space-5); max-width: 42ch; line-height: 1.6; }
   .bp-points { margin-top: var(--space-9); display: flex; flex-direction: column; gap: var(--space-5); position: relative; }
   .bp-point { display: flex; gap: var(--space-4); align-items: flex-start; font-size: var(--text-sm); color: rgba(255,255,255,0.8); }
   .bp-point svg { color: var(--accent-500); flex-shrink: 0; margin-top: 1px; }
   .bp-point b { color: #fff; font-weight: 600; }
-  .bp-foot { font-size: var(--text-xs); color: rgba(255,255,255,0.45); position: relative; }
+  .bp-foot { font-size: var(--text-sm); color: #FFFFFF; position: relative; }
 
   /* Volet formulaire */
   .formpane { display: flex; align-items: center; justify-content: center; padding: var(--space-10) var(--space-9); }
@@ -67,7 +67,6 @@ import BareLayout from '../layouts/BareLayout.astro';
 <main class="split">
   <!-- Volet de marque -->
   <aside class="brandpane">
-    <div class="bp-brand">LaNEM<span>.</span></div>
     <div class="bp-mid">
       <span class="bp-eyebrow">Front management · Admissions</span>
       <h1 class="bp-h">Un seul outil, adapté à chaque rôle.</h1>
