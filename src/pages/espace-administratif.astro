@@ -6,10 +6,6 @@ import Layout from '../layouts/Layout.astro';
 
   body { background: var(--surface-canvas); }
 
-  .greet { margin-bottom: var(--space-7); }
-  .greet h1 { font-family: var(--font-display); font-size: var(--text-2xl); font-weight: 700; letter-spacing: -0.02em; }
-  .greet p { font-size: var(--text-sm); color: var(--text-secondary); margin-top: var(--space-3); }
-  .greet p b { color: var(--text-primary); font-weight: 600; }
 
   .sec-label { font-size: var(--text-2xs); font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-tertiary); margin: 0 0 var(--space-4); }
 
@@ -84,9 +80,11 @@ import Layout from '../layouts/Layout.astro';
 </header>
 
 <main class="page">
-  <div class="greet">
-    <h1 id="greet">Bonjour</h1>
-    <p id="greet-sub">Vos files de travail de traitement (pièces, paiements, notes).</p>
+  <div class="page-head">
+    <div>
+      <h1 class="page-title" id="greet">Bonjour</h1>
+      <p class="page-sub" id="greet-sub">Vos files de travail de traitement (pièces, paiements, notes).</p>
+    </div>
   </div>
 
   <div class="em-alert em-alert--warning" id="pay-alert" style="margin-bottom: var(--space-8)" hidden>

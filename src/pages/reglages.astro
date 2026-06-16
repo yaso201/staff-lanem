@@ -48,7 +48,7 @@ import Layout from '../layouts/Layout.astro';
 
   <div class="card">
     <div class="card-head"><span class="card-title">Diagnostic des intégrations</span><button type="button" class="em-btn em-btn--secondary em-btn--sm" id="refresh">Rafraîchir</button></div>
-    <div class="diag" id="diag"><p class="t-muted" style="padding:var(--space-4)">Chargement…</p></div>
+    <div class="diag" id="diag"><div style="display:flex;flex-direction:column;gap:8px;padding:var(--space-4)"><div class="em-skeleton em-skeleton--title"></div><div class="em-skeleton em-skeleton--text"></div><div class="em-skeleton em-skeleton--text em-skeleton--text-short"></div></div></div>
   </div>
 
   <div class="card">

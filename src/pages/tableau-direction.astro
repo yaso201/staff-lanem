@@ -16,12 +16,7 @@ import Layout from '../layouts/Layout.astro';
   .kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--space-4); margin-bottom: var(--space-6); }
   @media (max-width: 980px){ .kpis { grid-template-columns: repeat(2, 1fr); } }
   @media (max-width: 520px){ .kpis { grid-template-columns: 1fr; } }
-  .kpi { background: var(--surface-paper); border: 1px solid var(--border-default); border-radius: var(--radius-lg); padding: var(--space-6); }
-  .kpi-l { font-size: var(--text-2xs); font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-tertiary); }
-  .kpi-v { font-family: var(--font-display); font-size: 32px; font-weight: 700; letter-spacing: -0.02em; line-height: 1; color: var(--text-primary); font-variant-numeric: tabular-nums; margin-top: var(--space-4); }
-  .kpi-v small { font-size: var(--text-md); color: var(--text-tertiary); font-weight: 600; }
-  .kpi-m { font-size: var(--text-xs); margin-top: var(--space-3); display: inline-flex; align-items: center; gap: var(--space-2); }
-  .kpi-m.up { color: var(--success-700); } .kpi-m.down { color: var(--error-700); } .kpi-m.flat { color: var(--text-tertiary); }
+  /* KPI : composant DS .em-kpi (convergence L3) */
 
   .card { background: var(--surface-paper); border: 1px solid var(--border-default); border-radius: var(--radius-lg); overflow: hidden; margin-bottom: var(--space-6); }
   .card-head { display: flex; align-items: center; justify-content: space-between; gap: var(--space-4); padding: var(--space-6) var(--space-7); border-bottom: 1px solid var(--border-subtle); }
@@ -115,10 +110,10 @@ import Layout from '../layouts/Layout.astro';
   </div>
 
   <div class="kpis">
-    <div class="kpi"><div class="kpi-l">Candidatures soumises</div><div class="kpi-v" id="k-sou">—</div><div class="kpi-m flat" id="k-sou-m"></div></div>
-    <div class="kpi"><div class="kpi-l">Conversion → inscription</div><div class="kpi-v" id="k-conv">—</div><div class="kpi-m flat" id="k-conv-m"></div></div>
-    <div class="kpi"><div class="kpi-l">Admis (ADM+ACO+ACC+INS)</div><div class="kpi-v" id="k-adm">—</div><div class="kpi-m flat" id="k-adm-m"></div></div>
-    <div class="kpi"><div class="kpi-l">Inscrits</div><div class="kpi-v" id="k-ins">—</div><div class="kpi-m flat" id="k-ins-m"></div></div>
+    <div class="em-kpi"><div class="em-kpi-label">Candidatures soumises</div><div class="em-kpi-value" id="k-sou">—</div><div class="em-kpi-meta" id="k-sou-m"></div></div>
+    <div class="em-kpi"><div class="em-kpi-label">Conversion → inscription</div><div class="em-kpi-value" id="k-conv">—</div><div class="em-kpi-meta" id="k-conv-m"></div></div>
+    <div class="em-kpi"><div class="em-kpi-label">Admis (ADM+ACO+ACC+INS)</div><div class="em-kpi-value" id="k-adm">—</div><div class="em-kpi-meta" id="k-adm-m"></div></div>
+    <div class="em-kpi"><div class="em-kpi-label">Inscrits</div><div class="em-kpi-value" id="k-ins">—</div><div class="em-kpi-meta" id="k-ins-m"></div></div>
   </div>
 
   <div class="card">
