@@ -12,7 +12,7 @@ import BareLayout from '../layouts/BareLayout.astro';
   @media (max-width: 860px){ .split { grid-template-columns: 1fr; } .brandpane { display: none; } }
 
   /* Volet de marque */
-  .brandpane { background: linear-gradient(165deg, var(--ink-900), var(--ink-950)); color: #fff; padding: var(--space-12) var(--space-11); display: flex; flex-direction: column; justify-content: space-between; position: relative; overflow: hidden; }
+  .brandpane { background: linear-gradient(rgba(31,18,74,0.68), rgba(31,18,74,0.68)), url('/lanem-login.webp') center/cover no-repeat; color: #fff; padding: var(--space-12) var(--space-11); display: flex; flex-direction: column; justify-content: space-between; position: relative; overflow: hidden; }
   .brandpane::after { content: ''; position: absolute; right: -120px; top: -120px; width: 360px; height: 360px; border-radius: 50%; background: radial-gradient(circle, rgba(245,158,11,0.22), transparent 70%); }
   .bp-brand { font-family: var(--font-display); font-size: 26px; font-weight: 700; letter-spacing: -0.02em; position: relative; }
   .bp-brand span { color: var(--accent-500); }
@@ -67,16 +67,11 @@ import BareLayout from '../layouts/BareLayout.astro';
 <main class="split">
   <!-- Volet de marque -->
   <aside class="brandpane">
-    <div class="bp-brand">emela<span>.</span></div>
+    <div class="bp-brand">LaNEM<span>.</span></div>
     <div class="bp-mid">
       <span class="bp-eyebrow">Front management · Admissions</span>
       <h1 class="bp-h">Un seul outil, adapté à chaque rôle.</h1>
       <p class="bp-p">L'application présente à chacun ce qu'il a le droit de faire — et masque le reste. La séparation des pouvoirs est garantie côté écran comme côté serveur.</p>
-      <div class="bp-points">
-        <div class="bp-point"><svg class="ico"><use href="#i-users"/></svg><span><b>Administratif, Responsable, Direction</b> — chaque profil, ses files de travail.</span></div>
-        <div class="bp-point"><svg class="ico"><use href="#i-shield"/></svg><span><b>Double barrière</b> — le front masque, Frappe refuse (ADR-004).</span></div>
-        <div class="bp-point"><svg class="ico"><use href="#i-flow"/></svg><span><b>Du dépôt à l'inscription</b> — BRO → SOU → ETU → ADM → ACC → INS.</span></div>
-      </div>
     </div>
     <div class="bp-foot">Authentification déléguée à Frappe · accès inter-domaines sécurisé</div>
   </aside>
