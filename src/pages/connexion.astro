@@ -98,6 +98,23 @@ import BareLayout from '../layouts/BareLayout.astro';
 
       <div class="login-foot"><svg class="ico-sm"><use href="#i-lock"/></svg><span>Connexion par session Frappe. Vos droits sont déterminés par votre rôle — et vérifiés à chaque action côté serveur.</span></div>
     </form>
+
+    <!-- Étape 2FA : saisie du code reçu par e-mail (comptes à double authentification) -->
+    <form class="login" id="otp" autocomplete="off" style="display:none">
+      <h2 class="login-h">Vérification en deux étapes</h2>
+      <p class="login-sub" id="otp-sub">Un code de vérification vient d'être envoyé à votre adresse e-mail. Saisissez-le pour terminer la connexion.</p>
+
+      <div class="field">
+        <label for="otp-code">Code de vérification</label>
+        <input class="em-input" id="otp-code" type="text" inputmode="numeric" autocomplete="one-time-code" placeholder="••••••" maxlength="8" />
+      </div>
+
+      <div id="otp-err" style="display:none;background:var(--danger-50,#fef2f2);color:var(--danger-700,#b91c1c);border-radius:8px;padding:10px 12px;font-size:13px;margin-bottom:14px;line-height:1.45"></div>
+
+      <button type="submit" class="em-btn em-btn--primary em-btn--lg em-btn--block" id="otp-btn">Valider le code<svg class="ico"><use href="#i-caretright"/></svg></button>
+
+      <div class="login-foot" style="cursor:pointer" id="otp-back"><svg class="ico-sm"><use href="#i-caretright"/></svg><span>Revenir à l'écran de connexion</span></div>
+    </form>
   </section>
 </main>
 
@@ -108,25 +125,40 @@ import BareLayout from '../layouts/BareLayout.astro';
   const form = document.getElementById('login');
   const errBox = document.getElementById('login-err');
   const btn = document.getElementById('login-btn');
+  const otpForm = document.getElementById('otp');
+  const otpErr = document.getElementById('otp-err');
+  const otpBtn = document.getElementById('otp-btn');
+  const otpCode = document.getElementById('otp-code');
+  const otpBack = document.getElementById('otp-back');
+
+  // SM = '/personnel' ; superset géré ensuite par shell.js
+  const HOME = { admin: '/espace-administratif', resp: '/cockpit-responsable', dir: '/tableau-direction', sm: '/personnel' };
+  function goHome(me){
+    const role = window.EmelaAPI.uxRole(me.roles);
+    window.location.href = HOME[role] || '/personnel';
+  }
 
   if (new URLSearchParams(location.search).get('expire')) {
     errBox.textContent = 'Votre session a expiré. Reconnectez-vous.';
     errBox.style.display = 'block';
   }
 
+  let tmpId = null;
+  function showOtp(){ form.style.display = 'none'; otpForm.style.display = ''; otpErr.style.display = 'none'; otpCode.value = ''; otpCode.focus(); }
+  function showLogin(){ otpForm.style.display = 'none'; form.style.display = ''; tmpId = null; btn.disabled = false; }
+
   form.addEventListener('submit', async e => {
     e.preventDefault();
     errBox.style.display = 'none';
     btn.disabled = true;
     try {
-      const me = await window.EmelaAPI.login(
+      const r = await window.EmelaAPI.login(
         document.getElementById('id').value.trim(),
         document.getElementById('pw').value
       );
-      const role = window.EmelaAPI.uxRole(me.roles);
-      window.location.href = { admin: '/espace-administratif', resp: '/cockpit-responsable', dir: '/tableau-direction' }[role];
+      if (r.twofa) { tmpId = r.tmp_id; showOtp(); return; }   // 2FA → écran code
+      goHome(r.me);
     } catch (err) {
-      // AUTH côté whoami = connecté mais sans rôle admission → message dédié
       errBox.textContent = err.code === 'LOGIN_FAILED'
         ? 'Identifiant ou mot de passe incorrect.'
         : (err.code === 'AUTH' || err.httpStatus === 403)
@@ -136,6 +168,24 @@ import BareLayout from '../layouts/BareLayout.astro';
       btn.disabled = false;
     }
   });
+
+  otpForm.addEventListener('submit', async e => {
+    e.preventDefault();
+    otpErr.style.display = 'none';
+    otpBtn.disabled = true;
+    try {
+      const me = await window.EmelaAPI.verifyOtp(tmpId, otpCode.value.trim());
+      goHome(me);
+    } catch (err) {
+      otpErr.textContent = err.message || 'Code incorrect ou expiré.';
+      otpErr.style.display = 'block';
+      otpBtn.disabled = false;
+      // Session de vérification expirée → retour saisie identifiants
+      if (/expir/i.test(err.message || '')) setTimeout(showLogin, 1500);
+    }
+  });
+
+  otpBack.addEventListener('click', showLogin);
 })();
 </script>
 

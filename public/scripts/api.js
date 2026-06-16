@@ -73,14 +73,34 @@
     BASE,
 
     /* ---- session (DEC-264) ---- */
+    // Étape 1 : usr/pwd. Si 2FA actif (rôle Admission SM…), Frappe renvoie 200 avec
+    // {tmp_id, verification} SANS session et envoie l'OTP (e-mail) → on rend la main au
+    // front pour saisir le code, puis verifyOtp(). Sinon, session directe → whoami.
     async login(usr, pwd) {
       const res = await fetch(BASE + '/api/method/login', {
         method: 'POST', credentials: 'include',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded', Accept: 'application/json' },
         body: new URLSearchParams({ usr, pwd }),
       });
+      let data = null; try { data = await res.json(); } catch (e) {}
       if (!res.ok) {
         throw { code: 'LOGIN_FAILED', message: 'Identifiant ou mot de passe incorrect.', httpStatus: res.status };
+      }
+      if (data && data.tmp_id && data.verification) {
+        return { twofa: true, tmp_id: data.tmp_id, verification: data.verification };
+      }
+      return { twofa: false, me: await API.whoami() };
+    },
+    // Étape 2 (2FA) : tmp_id (de l'étape 1) + code reçu. Frappe relit usr/pwd du cache via
+    // tmp_id, vérifie l'OTP → crée la session (cookie sid). Code faux/expiré → 401.
+    async verifyOtp(tmpId, otp) {
+      const res = await fetch(BASE + '/api/method/login', {
+        method: 'POST', credentials: 'include',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded', Accept: 'application/json' },
+        body: new URLSearchParams({ tmp_id: tmpId, otp }),
+      });
+      if (!res.ok) {
+        throw { code: 'OTP_FAILED', message: 'Code incorrect ou expiré. Réessayez.', httpStatus: res.status };
       }
       return API.whoami();
     },
