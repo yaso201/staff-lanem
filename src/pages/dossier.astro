@@ -208,7 +208,7 @@ import Layout from '../layouts/Layout.astro';
         </div>
       </div>
       <div class="dh-status">
-        <span class="em-badge em-badge--neutral em-badge--lg" id="dh-state"><span class="em-badge-dot"></span>…</span>
+        <span class="st st--lg" id="dh-state"><span class="st-dot"></span>…</span>
         <span style="font-size:var(--text-xs);color:var(--text-tertiary)" id="dh-statemeta"></span>
       </div>
     </div>
@@ -304,10 +304,10 @@ import Layout from '../layouts/Layout.astro';
   let D = null, ROLE = null;
 
   const STATUS = {
-    BRO:{l:'Brouillon',b:'neutral'}, SOP:{l:'Soumis (prov.)',b:'warning'}, SOU:{l:'Soumis',b:'info'},
-    INC:{l:'Incomplet',b:'warning'}, ETU:{l:'En étude',b:'info'}, ATT:{l:"Liste d'attente",b:'warning'},
-    ADM:{l:'Admis',b:'success'}, ACO:{l:'Admis sous réserve',b:'accent'}, ACC:{l:'Accepté',b:'success'},
-    INS:{l:'Inscrit',b:'success'}, REF:{l:'Refusé',b:'error'}, DES:{l:'Désisté',b:'neutral'}
+    BRO:{l:'Brouillon'}, SOP:{l:'Soumis (prov.)'}, SOU:{l:'Soumis'},
+    INC:{l:'Incomplet'}, ETU:{l:'En étude'}, ATT:{l:"Liste d'attente"},
+    ADM:{l:'Admis'}, ACO:{l:'Admis sous réserve'}, ACC:{l:'Accepté'},
+    INS:{l:'Inscrit'}, REF:{l:'Refusé'}, DES:{l:'Désisté'}
   };
   const PIECE_LABELS = { missing:'Manquante', uploaded:'Déposée', verified:'Déposée', rejected:'Rejetée' };
   const FEE_LABELS = { application:'Frais de candidature', competition:'Frais de concours', enrollment:"Frais d'inscription (frais 2)", annual:'Scolarité annuelle' };
@@ -323,7 +323,7 @@ import Layout from '../layouts/Layout.astro';
 
   function render(){
     if(!D || !ROLE) return;
-    const st = STATUS[D.statut] || {l:D.statut,b:'neutral'};
+    const st = STATUS[D.statut] || {l:D.statut};
     $('crumb-code').textContent = D.dossier_id;
     $('dh-av').textContent = (D.identite.nom_complet||'?').split(/\s+/).map(w=>w[0]).slice(0,2).join('').toUpperCase();
     $('dh-name').textContent = D.identite.nom_complet || D.dossier_id;
@@ -333,8 +333,9 @@ import Layout from '../layouts/Layout.astro';
       '<span><svg class="ico-sm"><use href="#i-cal"/></svg>'+esc(D.session.label||D.session.id||'')+'</span>'+
       (D.identite.email?'<span><svg class="ico-sm"><use href="#i-user"/></svg>'+esc(D.identite.email)+'</span>':'');
     const stEl = $('dh-state');
-    stEl.className = 'em-badge em-badge--'+st.b+' em-badge--lg';
-    stEl.innerHTML = '<span class="em-badge-dot"></span>'+esc(st.l)+' <span style="font-family:var(--font-mono);font-size:10px;opacity:.7;margin-left:4px">'+esc(D.statut)+'</span>';
+    // L6 (Option A) : système d'état unique .st--* (12 états, sémantique riche), comme la liste
+    stEl.className = 'st st--lg st--' + String(D.statut || '').toLowerCase();
+    stEl.innerHTML = '<span class="st-dot"></span>'+esc(st.l)+'<span class="st-code">'+esc(D.statut)+'</span>';
     $('dh-statemeta').textContent = 'Déposé le '+API.fmtDate(D.soumis_le)+(D.person_id?' · person_id '+D.person_id:'');
 
     renderFlow(); renderPieces(); renderPay(); renderNotes(); renderBourses(); renderTimeline(); renderSummary(); renderActions();
