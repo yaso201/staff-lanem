@@ -213,30 +213,6 @@
     },
     enroll(id) { return staffCall('enroll', { method: 'POST', body: { dossier_id: id } }); },
 
-    /* ---- Lot 3c — contrôle documentaire par pièce (socle back prouvé) ---- */
-    verifyPiece(id, code) { return staffCall('verify_piece', { method: 'POST', body: { dossier_id: id, piece_code: code } }); },
-    rejectPiece(id, code, reason, comment) { return staffCall('reject_piece', { method: 'POST', body: { dossier_id: id, piece_code: code, reason, comment } }); },
-    requirePiece(id, code) { return staffCall('require_piece', { method: 'POST', body: { dossier_id: id, piece_code: code } }); },
-    waivePiece(id, code) { return staffCall('waive_piece', { method: 'POST', body: { dossier_id: id, piece_code: code } }); },
-    resetPieceRequirement(id, code) { return staffCall('reset_piece_requirement', { method: 'POST', body: { dossier_id: id, piece_code: code } }); },
-    rejectDossier(id, motif) { return staffCall('reject_dossier', { method: 'POST', body: { dossier_id: id, motif } }); },
-    reopenDossier(id) { return staffCall('reopen_dossier', { method: 'POST', body: { dossier_id: id } }); },
-    notifyRecap(id) { return staffCall('notify_pieces_recap', { method: 'POST', body: { dossier_id: id } }); },
-    async viewPiece(id, code) {
-      // Voir-fichier INLINE : blob nouvel onglet (l'URL blob ignore Content-Disposition → rendu inline).
-      const res = await request('/api/method/admission.api.staff.download_piece_file',
-        { params: { dossier_id: id, piece_code: code }, raw: true });
-      const ct = res.headers.get('Content-Type') || '';
-      if (ct.includes('json')) {
-        const json = await res.json();
-        const err = (json.message && json.message.error) || {};
-        throw { code: err.code || 'ERROR', message: err.message || 'Pièce indisponible.', httpStatus: 409 };
-      }
-      const url = URL.createObjectURL(await res.blob());
-      window.open(url, '_blank');
-      setTimeout(() => URL.revokeObjectURL(url), 60000);
-    },
-
     /* ---- LOT W : cycle de vie complet (B0.1-B0.4) ---- */
     withdraw(id, motif) { return staffCall('withdraw', { method: 'POST', body: { dossier_id: id, motif } }); },
     setWaitlistRank(id, rang) { return staffCall('set_waitlist_rank', { method: 'POST', body: { dossier_id: id, rang } }); },

@@ -83,8 +83,7 @@ import Layout from '../layouts/Layout.astro';
   .doc-main { flex: 1; min-width: 0; }
   .doc-nm { font-size: var(--text-sm); font-weight: 600; color: var(--text-primary); }
   .doc-meta { font-size: var(--text-xs); color: var(--text-tertiary); margin-top: 1px; }
-  .doc-act { flex-shrink: 0; align-self: flex-start; display: flex; flex-wrap: wrap; gap: var(--space-2); justify-content: flex-end; }
-  .doc-btns { display: flex; flex-wrap: wrap; gap: var(--space-2); margin-top: var(--space-3); }
+  .doc-act { flex-shrink: 0; }
 
   /* Paiement */
   .pay-row { display: grid; grid-template-columns: 1fr auto; gap: var(--space-3) var(--space-5); align-items: center; padding: var(--space-5) 0; border-top: 1px solid var(--border-subtle); }
@@ -308,10 +307,9 @@ import Layout from '../layouts/Layout.astro';
     BRO:{l:'Brouillon'}, SOP:{l:'Soumis (prov.)'}, SOU:{l:'Soumis'},
     INC:{l:'Incomplet'}, ETU:{l:'En étude'}, ATT:{l:"Liste d'attente"},
     ADM:{l:'Admis'}, ACO:{l:'Admis sous réserve'}, ACC:{l:'Accepté'},
-    INS:{l:'Inscrit'}, REF:{l:'Refusé'}, REJ:{l:'Rejeté (doc.)'}, DES:{l:'Désisté'}
+    INS:{l:'Inscrit'}, REF:{l:'Refusé'}, DES:{l:'Désisté'}
   };
-  const PIECE_LABELS = { missing:'Manquante', uploaded:'Déposée', verified:'Vérifiée', rejected:'Rejetée' };
-  const REJECT_REASONS = ['Illisible / floue','Mauvaise pièce','Incomplète','Non conforme','Expirée','Autre'];
+  const PIECE_LABELS = { missing:'Manquante', uploaded:'Déposée', verified:'Déposée', rejected:'Rejetée' };
   const FEE_LABELS = { application:'Frais de candidature', competition:'Frais de concours', enrollment:"Frais d'inscription (frais 2)", annual:'Scolarité annuelle' };
   const PM_LABELS = { Cash:'Espèces', Bank:'Virement bancaire', Online:'En ligne' };
 
@@ -360,59 +358,12 @@ import Layout from '../layouts/Layout.astro';
     const pieces = D.pieces||[];
     const missing = pieces.filter(p=>p.requise && p.statut==='missing').length;
     badge($('pieces-badge'), missing? missing+' manquante(s)' : 'Complètes', missing?'warning':'success');
-    // Le SERVEUR fait foi : actions visibles seulement si Administratif & dossier SOU (le back re-garde).
-    const canAct = ROLE==='admin' && D.statut==='SOU';
-    const stCls = { missing:'warning', uploaded:'neutral', verified:'success', rejected:'danger' };
-    const B = (p,a,l,k)=>'<button class="em-btn em-btn--'+k+' em-btn--sm" data-pact="'+a+'" data-code="'+esc(p.code)+'">'+l+'</button>';
     $('pieces-body').innerHTML = pieces.length ? pieces.map(p=>{
-      const ok = p.statut==='verified';
-      let req = '';
-      if(p.staff_requirement==='required') req = '<span class="em-badge em-badge--accent em-badge--sm">Exigée</span>';
-      else if(p.staff_requirement==='waived') req = '<span class="em-badge em-badge--neutral em-badge--sm">Dispensée</span>';
-      const motif = (p.statut==='rejected' && (p.reject_reason||p.reject_comment))
-        ? '<div class="doc-meta" style="color:var(--clay-deep)">Refusée : '+esc(p.reject_reason||'')+(p.reject_comment?' — '+esc(p.reject_comment):'')+'</div>' : '';
-      let btns = '';
-      if(canAct){
-        let v='';  // axe FORME (verdict)
-        if(p.statut==='uploaded'||p.statut==='rejected') v += B(p,'verify','Vérifier','primary');
-        if(p.statut==='uploaded'||p.statut==='verified') v += B(p,'reject','Refuser','secondary');
-        let e='';  // axe EXIGENCE (transitions utiles seulement)
-        if(p.staff_requirement!=='required') e += B(p,'require','Exiger','ghost');
-        if(p.staff_requirement!=='waived') e += B(p,'waive','Dispenser','ghost');
-        if(p.staff_requirement!=='default') e += B(p,'reset','Réinitialiser','ghost');
-        const view = p.has_file ? B(p,'view','Voir','ghost') : '';
-        btns = '<div class="doc-btns">'+v+e+view+'</div>';
-      } else if(p.has_file){
-        btns = '<div class="doc-btns">'+B(p,'view','Voir','ghost')+'</div>';
-      }
+      const ok = p.statut==='uploaded'||p.statut==='verified';
       return '<div class="doc-row"><span class="doc-ic '+(ok?'ok':'wait')+'"><svg class="ico"><use href="#i-'+(ok?'check':'hourglass')+'"/></svg></span>'+
-        '<div class="doc-main"><div class="doc-nm">'+esc(p.label||p.code)+'</div>'+
-        '<div class="doc-meta">'+(p.requise?'Requise':'Optionnelle')+'</div>'+motif+btns+'</div>'+
-        '<div class="doc-act"><span class="em-badge em-badge--'+(stCls[p.statut]||'neutral')+' em-badge--sm">'+esc(PIECE_LABELS[p.statut]||p.statut)+'</span>'+req+'</div></div>';
+        '<div class="doc-main"><div class="doc-nm">'+esc(p.label||p.code)+'</div><div class="doc-meta">'+(p.requise?'Requise':'Optionnelle')+'</div></div>'+
+        '<div class="doc-act"><span class="em-badge em-badge--'+(ok?'success':'warning')+' em-badge--sm">'+esc(PIECE_LABELS[p.statut]||p.statut)+'</span></div></div>';
     }).join('') : '<p class="t-body-sm t-muted" style="margin:0">Aucune pièce attendue pour ce profil.</p>';
-    $('pieces-body').querySelectorAll('[data-pact]').forEach(b=> b.addEventListener('click', ()=> pieceAction(b.dataset.pact, b.dataset.code)));
-  }
-
-  async function pieceAction(act, code){
-    if(act==='view'){ API.viewPiece(D.dossier_id, code).catch(e=>UI.emToast(e.message,'error')); return; }
-    if(act==='reject'){ rejectPieceModal(code); return; }
-    const fn = { verify:API.verifyPiece, require:API.requirePiece, waive:API.waivePiece, reset:API.resetPieceRequirement }[act];
-    if(!fn) return;
-    try{ await fn(D.dossier_id, code); UI.emToast('Pièce mise à jour.','success'); await refresh(); }
-    catch(e){ UI.emToast(e.message,'error'); }
-  }
-
-  function rejectPieceModal(code){
-    UI.emModal({
-      title:'Refuser la pièce', danger:true,
-      lead:"Motif communiqué au candidat lors de la notification. « Autre » exige un commentaire.",
-      fields:[
-        { name:'reason', label:'Motif', type:'select', required:true, options: REJECT_REASONS.map(r=>({value:r,label:r})) },
-        { name:'comment', label:'Commentaire', type:'textarea' },
-      ],
-      submitLabel:'Refuser la pièce',
-      onSubmit: async v=>{ await API.rejectPiece(D.dossier_id, code, v.reason, v.comment||''); UI.emToast('Pièce refusée.','success'); await refresh(); },
-    });
   }
 
   function renderPay(){
@@ -571,11 +522,7 @@ import Layout from '../layouts/Layout.astro';
     const S = D.statut, B = D.bourses||{};
 
     if(ROLE==='admin'){
-      if(S==='SOU') body.appendChild(act("Mettre en étude (SOU → ETU)",'primary',async()=>{ try{ await API.startReview(D.dossier_id); UI.emToast('Dossier mis en étude.','success'); await refresh(); }catch(e){ UI.emToast(e.message,'error'); } },'checkcircle'));
-      // Lot 3c-2 — contrôle documentaire (le back re-garde tout)
-      if(S==='SOU') body.appendChild(act('Notifier le candidat (pièces à corriger)','secondary',async()=>{ try{ await API.notifyRecap(D.dossier_id); UI.emToast('Récapitulatif envoyé au candidat.','success'); await refresh(); }catch(e){ UI.emToast(e.message,'error'); } },'paperplane'));
-      if(S==='SOU') body.appendChild(act('Rejeter le dossier (contrôle documentaire)','danger',()=>motifModal('Rejeter le dossier',"Sortie de la boucle de re-soumission — le candidat est notifié. Réversible (Rouvrir). Pas de remboursement (CGV).",'Rejeter le dossier',m=>API.rejectDossier(D.dossier_id,m)),'gavel'));
-      if(S==='REJ') body.appendChild(act('Rouvrir le dossier (REJ → SOU)','primary',async()=>{ try{ await API.reopenDossier(D.dossier_id); UI.emToast('Dossier rouvert.','success'); await refresh(); }catch(e){ UI.emToast(e.message,'error'); } },'checkcircle'));
+      if(S==='SOU') body.appendChild(act("Mettre en étude (SOU → ETU)",'primary',async()=>{ await API.startReview(D.dossier_id); UI.emToast('Dossier mis en étude.','success'); await refresh(); },'checkcircle'));
       if(S==='SOU'||S==='ETU') body.appendChild(act('Demander un complément…','secondary',()=>motifModal('Demander un complément',"Renvoie le dossier en Incomplet (INC) — le candidat est notifié avec le motif.",'Renvoyer en incomplet',m=>API.requestComplement(D.dossier_id,m)),'paperplane'));
       if(D.is_prepa && S==='ETU' && !(D.notes&&D.notes.validees)) body.appendChild(act((D.notes&&D.notes.valeurs)?'Corriger la saisie des notes…':'Saisir les notes de concours…','primary',()=>{
         UI.emModal({ title:'Notes de concours', lead:'Saisie par l\'Administratif — la validation reste au Responsable (séparation des pouvoirs).',
