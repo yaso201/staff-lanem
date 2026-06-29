@@ -22,13 +22,17 @@ const apiBase = import.meta.env.PUBLIC_API_BASE || 'http://admission-dev.localho
     <title>{title}</title>
     <link rel="icon" href="/favicon.ico" />
     <script is:inline define:vars={{ apiBase }}>window.EMELA_API_BASE = apiBase;</script>
+    <!-- D-LAYOUT-SCRIPT-ORDER-19 : externes EN HEAD (avant le slot) → EmelaAPI/EmelaUI définis
+         AVANT toute IIFE de page (sinon `window.EmelaUI` undefined → crash, back-office inopérant).
+         Ordre api→ui→shell préservé ; EMELA_API_BASE reste avant api.js ; shell.js boote en
+         DOMContentLoaded (aucun accès DOM au load). -->
+    <script is:inline src="/scripts/api.js"></script>
+    <script is:inline src="/scripts/ui.js"></script>
+    <script is:inline src="/scripts/shell.js"></script>
   </head>
   <body data-role={role} data-page={page} data-shared={shared ? '' : undefined} data-prog={prog}>
     <Icons />
     <a href="#main-content" class="skip-link">Aller au contenu</a>
     <slot />
-    <script is:inline src="/scripts/api.js"></script>
-    <script is:inline src="/scripts/ui.js"></script>
-    <script is:inline src="/scripts/shell.js"></script>
   </body>
 </html>
