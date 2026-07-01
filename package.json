@@ -6,11 +6,17 @@
   "scripts": {
     "dev": "astro dev",
     "build": "astro build",
-    "preview": "astro preview",
-    "astro": "astro"
+    "preview": "npm run build && wrangler dev",
+    "astro": "astro",
+    "deploy": "npm run build && wrangler deploy",
+    "cf-typegen": "wrangler types"
   },
   "dependencies": {
-    "astro": "^5.6.0",
-    "@emela/design-system": "file:./vendor/design-system"
+    "@astrojs/cloudflare": "12",
+    "@emela/design-system": "file:./vendor/design-system",
+    "astro": "^5.6.0"
+  },
+  "devDependencies": {
+    "wrangler": "^4.106.0"
   }
 }
